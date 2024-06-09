@@ -29,6 +29,17 @@ dev = [
     "ruff"  # linting
 ]
 
+[project.scripts]
+preprocess_filter = "preprocess_toolbox.cli:data_filter"
+preprocess_missing_dates = "preprocess_toolbox.cli:analyse"
+preprocess_missing_locations = "preprocess_toolbox.cli:interpolate"
+# TODO: The following will incorporate correction calculation AND icenet_process normalisation / variable preparation w.r.t source data
+preprocess_amsr2 = "preprocess_toolbox.datasets.cli:amsr2"
+preprocess_cmip6 = "preprocess_toolbox.datasets.cli:cmip6"
+preprocess_era5 = "preprocess_toolbox.datasets.cli:era5"
+preprocess_oras5 = "preprocess_toolbox.datasets.cli:oras5"
+preprocess_osisaf = "preprocess_toolbox.datasets.cli:osisaf"
+
 [project.urls]
 
 bugs = "https://github.com/antarctica/preprocess_toolbox/issues"
