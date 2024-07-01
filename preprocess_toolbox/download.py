@@ -4,6 +4,10 @@ import iris.analysis
 import iris.cube
 import iris.exceptions
 
+
+# TODO: move        self._rotatable_files = []
+# TODO: move        self._sic_ease_cubes = dict()
+
 def rotate_wind_data(self,
                      apply_to: object = ("uas", "vas"),
                      manual_files: object = None):

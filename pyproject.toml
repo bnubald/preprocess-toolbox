@@ -18,27 +18,53 @@ classifiers = [
 ]
 license = {text = "MIT license"}
 dependencies = [
-  
+    "typer",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "coverage",  # testing
     "mypy",  # linting
-    "pytest",  # testing
-    "ruff"  # linting
+    "ruff",  # linting
+    "watchdog",
+    "flake8",
+    "tox",
+    "coverage",
+    "twine",
+    "pytest",
+    "black",
+    "build",
+    "importlib_metadata",
+    "pre-commit",
+]
+docs = [
+  "jinja2",
+  "Sphinx"
 ]
 
 [project.scripts]
+preprocess_project = "preprocess_toolbox.cli:projection"
 preprocess_filter = "preprocess_toolbox.cli:data_filter"
 preprocess_missing_dates = "preprocess_toolbox.cli:analyse"
 preprocess_missing_locations = "preprocess_toolbox.cli:interpolate"
 # TODO: The following will incorporate correction calculation AND icenet_process normalisation / variable preparation w.r.t source data
-preprocess_amsr2 = "preprocess_toolbox.datasets.cli:amsr2"
-preprocess_cmip6 = "preprocess_toolbox.datasets.cli:cmip6"
-preprocess_era5 = "preprocess_toolbox.datasets.cli:era5"
-preprocess_oras5 = "preprocess_toolbox.datasets.cli:oras5"
+preprocess_amsr2 = "preprocess_toolbox.data.cli:amsr2"
+preprocess_cmip6 = "preprocess_toolbox.data.cli:cmip6"
+preprocess_era5 = "preprocess_toolbox.data.cli:era5"
+# TODO: preprocess_hres = "preprocess_toolbox.data.cli:hres"
+# TODO: preprocess_oras5 = "preprocess_toolbox.data.cli:oras5"
 preprocess_osisaf = "preprocess_toolbox.datasets.cli:osisaf"
+# Generation of metadata types
+preprocess_dates = "preprocess_toolbox.metadata.cli:date"
+preprocess_gen_mask = "preprocess_toolbox.metadata.cli:mask"
+
+
+icenet_process_cmip = "icenet.data.processors.cmip:main"
+icenet_process_era5 = "icenet.data.processors.era5:main"
+icenet_process_oras5 = "icenet.data.processors.oras5:main"
+icenet_process_hres = "icenet.data.processors.hres:main"
+icenet_process_sic = "icenet.data.processors.osi:main"
+icenet_process_metadata = "icenet.data.processors.meta:main"
+
 
 [project.urls]
 
@@ -47,13 +73,14 @@ changelog = "https://github.com/antarctica/preprocess_toolbox/blob/master/change
 homepage = "https://github.com/antarctica/preprocess_toolbox"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+py-modules = ["preprocess_toolbox"]
+
+[tool.setuptools.dynamic]
+version = {attr = "preprocess_toolbox.__version__"}
+readme = {file = ["README.md"]}
 
 [tool.setuptools.package-data]
 "*" = ["*.*"]
-
-
-
 
 # Mypy
 # ----

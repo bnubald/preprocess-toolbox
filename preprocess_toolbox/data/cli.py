@@ -4,22 +4,22 @@ app = typer.Typer()
 
 
 @app.command()
-def projection():
+def amsr2():
     pass
 
 
 @app.command()
-def data_filter():
+def cmip6():
     pass
 
 
 @app.command()
-def missing_dates():
+def era5():
     pass
 
 
 @app.command()
-def missing_locations():
+def osisaf():
     pass
 
 
