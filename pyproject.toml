@@ -18,7 +18,8 @@ classifiers = [
 ]
 license = {text = "MIT license"}
 dependencies = [
-    "typer",
+    "download-toolbox",
+    "orjson",
 ]
 
 [project.optional-dependencies]
@@ -38,32 +39,29 @@ dev = [
 ]
 docs = [
   "jinja2",
-  "Sphinx"
+  "Sphinx",
+  "myst_parser"
 ]
 
 [project.scripts]
-preprocess_project = "preprocess_toolbox.cli:projection"
-preprocess_filter = "preprocess_toolbox.cli:data_filter"
-preprocess_missing_dates = "preprocess_toolbox.cli:analyse"
-preprocess_missing_locations = "preprocess_toolbox.cli:interpolate"
+preprocess_init_loader = "preprocess_toolbox.cli:init_loader"
+
+preprocess_missing_spatial = "preprocess_toolbox.data.cli:missing_spatial"
+preprocess_missing_time = "preprocess_toolbox.data.cli:missing_time"
+preprocess_regrid = "preprocess_toolbox.data.cli:regrid"
+preprocess_rotate = "preprocess_toolbox.data.cli:rotate"
+
 # TODO: The following will incorporate correction calculation AND icenet_process normalisation / variable preparation w.r.t source data
-preprocess_amsr2 = "preprocess_toolbox.data.cli:amsr2"
-preprocess_cmip6 = "preprocess_toolbox.data.cli:cmip6"
-preprocess_era5 = "preprocess_toolbox.data.cli:era5"
+preprocess_amsr2 = "preprocess_toolbox.dataset.cli:amsr2"
+preprocess_cmip6 = "preprocess_toolbox.dataset.cli:cmip6"
+preprocess_era5 = "preprocess_toolbox.dataset.cli:era5"
 # TODO: preprocess_hres = "preprocess_toolbox.data.cli:hres"
 # TODO: preprocess_oras5 = "preprocess_toolbox.data.cli:oras5"
-preprocess_osisaf = "preprocess_toolbox.datasets.cli:osisaf"
+preprocess_osisaf = "preprocess_toolbox.dataset.cli:osisaf"
+
 # Generation of metadata types
-preprocess_dates = "preprocess_toolbox.metadata.cli:date"
+preprocess_gen_date = "preprocess_toolbox.metadata.cli:date"
 preprocess_gen_mask = "preprocess_toolbox.metadata.cli:mask"
-
-
-icenet_process_cmip = "icenet.data.processors.cmip:main"
-icenet_process_era5 = "icenet.data.processors.era5:main"
-icenet_process_oras5 = "icenet.data.processors.oras5:main"
-icenet_process_hres = "icenet.data.processors.hres:main"
-icenet_process_sic = "icenet.data.processors.osi:main"
-icenet_process_metadata = "icenet.data.processors.meta:main"
 
 
 [project.urls]

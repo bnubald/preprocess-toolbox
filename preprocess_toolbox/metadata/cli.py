@@ -1,17 +1,20 @@
-import typer
+from download_toolbox.base import DatasetConfig
 
-app = typer.Typer()
+from preprocess_toolbox.metadata.meta import MetaPreProcessor
+from preprocess_toolbox.metadata.mask import Masks
+from preprocess_toolbox.cli import ProcessingArgParser
 
 
-@app.command()
 def date():
-    pass
+    args = ProcessingArgParser().parse_args()
+
+    MetaPreProcessor(args.name,
+                     args.dataset).process()
 
 
-@app.command()
 def mask():
-    pass
+    args = ProcessingArgParser().parse_args()
+    ds = DatasetConfig.load_dataset(args.dataset)
+    masks = Masks(args.name)
 
 
-if __name__ == "__main__":
-    app()
