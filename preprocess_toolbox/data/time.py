@@ -1,46 +1,41 @@
-def missing_dates(ds,
-                  variable):
-    logging.info("Opening for interpolation: {}".format(filenames))
-    ds = xr.open_mfdataset(filenames,
-                           combine="nested",
-                           concat_dim="time",
-                           chunks=dict(time=self._chunk_size, ),
-                           parallel=True)
+import datetime as dt
+import logging
+import os
 
+import numpy as np
+import pandas as pd
+import xarray as xr
+
+from download_toolbox.dataset import DatasetConfig
+
+
+def process_missing_dates(ds: xr.Dataset,
+                          ds_config: DatasetConfig,
+                          variable: str,
+                          end_date: dt.date = None,
+                          invalid_dates: list[dt.date] = None,
+                          missing_dates_path: os.PathLike = "missing_days.csv",
+                          start_date: dt.date = None,):
     da = getattr(ds, variable)
-
-    if pd.Timestamp(1979, 1, 2) in da.time.values \
-        and dt.date(1979, 1, 1) in self._dates \
-        and pd.Timestamp(1979, 1, 1) not in da.time.values:
-        da_1979_01_01 = da.sel(
-            time=[pd.Timestamp(1979, 1, 2)]).copy().assign_coords(
-            {'time': [pd.Timestamp(1979, 1, 1)]})
-        da = xr.concat([da, da_1979_01_01], dim='time')
-        da = da.sortby('time')
+    da = da.sortby('time')
 
     dates_obs = [pd.to_datetime(date).date() for date in da.time.values]
     dates_all = [pd.to_datetime(date).date() for date in
-                 pd.date_range(min(self._dates), max(self._dates))]
+                 pd.date_range(min(dates_obs) if not start_date else start_date,
+                               max(dates_obs) if not end_date else end_date,
+                               freq="1{}".format(ds_config.frequency.freq))]
 
-    # Weirdly, we were getting future warnings for timestamps, but unsure
-    # where from
-    invalid_dates = [pd.to_datetime(d).date() for d in self._invalid_dates]
+    invalid_dates = list() if invalid_dates is None else invalid_dates
     missing_dates = [date for date in dates_all
                      if date not in dates_obs
                      or date in invalid_dates]
 
     logging.info("Processing {} missing dates".format(len(missing_dates)))
 
-    missing_dates_path = os.path.join(
-        self.get_data_var_folder("siconca"), "missing_days.csv")
+    with open(missing_dates_path, "w") as fh:
+        fh.writelines([el.strftime(ds_config.frequency.date_format) for el in missing_dates])
 
-    with open(missing_dates_path, "a") as fh:
-        for date in missing_dates:
-            # FIXME: slightly unusual format for Ymd dates
-            fh.write(date.strftime("%Y,%m,%d\n"))
-
-    logging.debug("Interpolating {} missing dates".
-                  format(len(missing_dates)))
+    logging.debug("Interpolating {} missing dates".format(len(missing_dates)))
 
     for date in missing_dates:
         if pd.Timestamp(date) not in da.time.values:
@@ -52,14 +47,16 @@ def missing_dates(ds,
     logging.debug("Finished interpolation")
 
     da = da.sortby('time')
-    da.data = np.array(da.data, dtype=self._dtype)
+    da.data = np.array(da.data)
 
     for date in missing_dates:
-        date_str = pd.to_datetime(date).strftime("%Y_%m_%d")
+        date_str = pd.to_datetime(date).strftime(ds_config.frequency.date_format)
+        logging.debug("Outputting interpolated missing date for analysis for {}".format(date_str))
+
         fpath = os.path.join(
-            self.get_data_var_folder(
-                "siconca", append=[str(pd.to_datetime(date).year)]),
-            "missing.{}.nc".format(date_str))
+            ds_config.path,
+            "_missing_time.interp",
+            "{}.nc".format(date_str))
 
         if not os.path.exists(fpath):
             day_da = da.sel(time=slice(date, date))
@@ -67,4 +64,5 @@ def missing_dates(ds,
             logging.info("Writing missing date file {}".format(fpath))
             day_da.to_netcdf(fpath)
 
-    return da
+    ds[variable] = da
+    return ds

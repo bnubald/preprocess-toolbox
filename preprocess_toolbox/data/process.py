@@ -4,9 +4,9 @@ import re
 
 import iris
 
-from preprocess_toolbox.data.geo import (gridcell_angles_from_dim_coords,
-                                         invert_gridcell_angles,
-                                         rotate_grid_vectors)
+from preprocess_toolbox.data.spatial import (gridcell_angles_from_dim_coords,
+                                             invert_gridcell_angles,
+                                             rotate_grid_vectors)
 
 
 def rotate_data(ref_ds: object,

@@ -5,7 +5,7 @@
 import pytest
 
 
-from preprocess_toolbox import preprocess_toolbox
+import preprocess_toolbox
 
 
 @pytest.fixture

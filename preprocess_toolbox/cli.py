@@ -104,8 +104,8 @@ class ProcessingArgParser(argparse.ArgumentParser):
                           action="store_true",
                           default=False)
 
-    def add_destination(self):
-        self.add_argument("destination", type=str, nargs="?", default=None)
+    def add_destination_arg(self):
+        self.add_argument("destination_id", type=str, nargs="?", default=None)
         return self
 
     def add_loader_args(self):
@@ -168,6 +168,13 @@ class ProcessingArgParser(argparse.ArgumentParser):
                           help="Comma separated list of abs vars",
                           type=csv_arg,
                           default=[])
+        return self
+
+    def add_var_name_arg(self):
+        self.add_argument("-n", "--var-names",
+                          help="Comma separated list of variable names",
+                          type=csv_arg,
+                          default=None)
         return self
 
     def add_trend_args(self):
