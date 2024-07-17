@@ -104,6 +104,10 @@ class ProcessingArgParser(argparse.ArgumentParser):
                           action="store_true",
                           default=False)
 
+    def add_ref_ds_arg(self):
+        self.add_argument("reference", type=str)
+        return self
+
     def add_destination_arg(self):
         self.add_argument("destination_id", type=str, nargs="?", default=None)
         return self

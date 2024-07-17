@@ -9,9 +9,63 @@ from preprocess_toolbox.data.spatial import (gridcell_angles_from_dim_coords,
                                              rotate_grid_vectors)
 
 
-def rotate_data(ref_ds: object,
-                process_ds: object,
-                vars_to_rotate: object = ("uas", "vas")):
+def regrid_dataset(ref_ds: object,
+                   process_ds: object):
+    results = list()
+
+    logging.info("Regridding {} against {}".format(process_ds, ref_ds))
+    import sys
+    sys.exit(0)
+
+    for datafile in files:
+        (datafile_path, datafile_name) = os.path.split(datafile)
+
+        new_filename = re.sub(r'^{}'.format(
+            self.pregrid_prefix), '', datafile_name)
+        new_datafile = os.path.join(datafile_path, new_filename)
+
+        moved_datafile = None
+
+        if os.path.exists(new_datafile):
+            moved_filename = "moved.{}".format(new_filename)
+            moved_datafile = os.path.join(datafile_path, moved_filename)
+            os.rename(new_datafile, moved_datafile)
+
+            logging.info("{} already existed, moved to {}".
+                         format(new_filename, moved_filename))
+
+        logging.debug("Regridding {}".format(datafile))
+
+        try:
+            cube = iris.load_cube(datafile)
+            cube = self.convert_cube(cube)
+
+            cube_ease = cube.regrid(
+                self.sic_ease_cube, iris.analysis.Linear())
+
+        except iris.exceptions.CoordinateNotFoundError:
+            logging.warning("{} has no coordinates...".
+                            format(datafile_name))
+            if self.delete:
+                logging.debug("Deleting failed file {}...".
+                              format(datafile_name))
+                os.unlink(datafile)
+            continue
+
+        self.additional_regrid_processing(datafile, cube_ease)
+
+        logging.info("Saving regridded data to {}... ".format(new_datafile))
+        iris.save(cube_ease, new_datafile, fill_value=np.nan)
+        results.append((new_datafile, moved_datafile))
+
+        if self.delete:
+            logging.info("Removing {}".format(datafile))
+            os.remove(datafile)
+
+
+def rotate_dataset(ref_ds: object,
+                   process_ds: object,
+                   vars_to_rotate: object = ("uas", "vas")):
     """
 
     :param ref_file:
@@ -96,3 +150,5 @@ def rotate_data(ref_ds: object,
             iris.save(wind_cubes_r[vars_to_rotate[i]], temp_name)
             os.replace(temp_name, name)
             logging.debug("Overwritten {}".format(name))
+
+    merge_files(new_datafile, moved_datafile, self._drop_vars)

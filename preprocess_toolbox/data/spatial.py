@@ -12,7 +12,6 @@ import xarray as xr
 from download_toolbox.dataset import DatasetConfig
 
 from scipy import interpolate
-#from scipy.spatial import QhullError
 
 
 def spatial_interpolation(da: xr.DataArray,
@@ -278,3 +277,4 @@ def invert_gridcell_angles(angles: object):
     name = angles.name()
     if name in names:
         angles.rename(names[1 - names.index(name)])
+
