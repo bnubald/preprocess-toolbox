@@ -51,6 +51,7 @@ def regrid():
     ds, ds_config = init_dataset(args)
 
     regrid_dataset(args.reference, ds_config)
+    ds_config.save_config()
 
 
 def rotate():
@@ -58,6 +59,5 @@ def rotate():
     ds, ds_config = init_dataset(args)
 
     rotate_dataset(args.reference, ds_config)
-
-
+    ds_config.save_config()
 
