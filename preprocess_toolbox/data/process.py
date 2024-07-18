@@ -44,7 +44,16 @@ def regrid_dataset(ref_file: os.PathLike,
 
         try:
             cube = iris.load_cube(regrid_datafile)
+
+            # TODO: there is a lot of assumption here
+            if cube.coord_system() is None:
+                cs = ref_cube.coord_system().ellipsoid
+
+                for coord in ['longitude', 'latitude']:
+                    cube.coord(coord).coord_system = cs
+
             cube_regridded = cube.regrid(ref_cube, iris.analysis.Linear())
+
         except iris.exceptions.CoordinateNotFoundError:
             logging.warning("{} has no coordinates...".format(datafile_name))
             continue
