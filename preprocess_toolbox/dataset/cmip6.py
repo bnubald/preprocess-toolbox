@@ -23,15 +23,3 @@ def additional_regrid_processing(self,
         cube_ease.data = cube_ease.data.astype(np.float32)
 
 
-def convert_cube(self, cube: object) -> object:
-    """Converts Iris cube to be fit for CMIP regrid
-
-    :param cube:   the cube requiring alteration
-    :return cube:   the altered cube
-    """
-
-    cs = self.sic_ease_cube.coord_system().ellipsoid
-
-    for coord in ['longitude', 'latitude']:
-        cube.coord(coord).coord_system = cs
-    return cube

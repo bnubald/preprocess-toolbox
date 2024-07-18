@@ -16,10 +16,8 @@ def init_dataset(args):
     if args.destination_id is not None:
         ds_config.copy_to(args.destination_id)
 
-    if args.var_names is None:
-        raise RuntimeError("No variable names have been provided")
-
-    ds = ds_config.get_dataset(args.var_names)
+    var_names = None if "var_names" not in args else args.var_names
+    ds = ds_config.get_dataset(var_names)
     return ds, ds_config
 
 
@@ -51,15 +49,15 @@ def missing_spatial():
 def regrid():
     args = ProcessingArgParser().add_ref_ds_arg().add_destination_arg().parse_args()
     ds, ds_config = init_dataset(args)
-    ref_ds = get_dataset_config_implementation(args.reference).get_dataset()
-    regrid_dataset(ref_ds, ds)
+
+    regrid_dataset(args.reference, ds_config)
 
 
 def rotate():
-    args = ProcessingArgParser().add_ref_ds_arg().parse_args()
+    args = ProcessingArgParser().add_ref_ds_arg().add_destination_arg().add_var_name_arg().parse_args()
     ds, ds_config = init_dataset(args)
-    ref_ds = get_dataset_config_implementation(args.reference).get_dataset()
-    rotate_dataset(ref_ds, ds)
+
+    rotate_dataset(args.reference, ds_config)
 
 
 
