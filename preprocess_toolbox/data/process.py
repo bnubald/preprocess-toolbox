@@ -22,6 +22,9 @@ def regrid_dataset(ref_file: os.PathLike,
      as the native files downloaded just aren't suitable. That doesn't belong in here though!
      Or if it is included it should be as a helper utility
 
+    TODO: regrid_processing needs to come from a module:regrid method in icenet.data.regrid.osisaf, for example
+     which needs to be specified from the command line
+
     :param ref_file:
     :param process_config:
     :param regrid_processing:

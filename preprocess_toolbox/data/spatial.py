@@ -21,6 +21,8 @@ def spatial_interpolation(da: xr.DataArray,
     """
     TODO: method inherited from icenet2 draft code from Tom, not sure it's generalisable
 
+    TODO: spatial mask can be a callable specified on the command line?
+
     :param da:
     :param ds_config:
     :param spatial_mask:
@@ -127,8 +129,6 @@ def spatial_interpolation(da: xr.DataArray,
                     logging.info("Saving interpolation figure for analysis: {}".format(output_path))
                     fig.savefig(output_path)
                     plt.close()
-                    import sys
-                    sys.exit(0)
     return da
 
 

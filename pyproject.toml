@@ -44,8 +44,6 @@ docs = [
 ]
 
 [project.scripts]
-preprocess_init_loader = "preprocess_toolbox.cli:init_loader"
-
 preprocess_missing_spatial = "preprocess_toolbox.data.cli:missing_spatial"
 preprocess_missing_time = "preprocess_toolbox.data.cli:missing_time"
 preprocess_regrid = "preprocess_toolbox.data.cli:regrid"
@@ -60,9 +58,11 @@ preprocess_era5 = "preprocess_toolbox.dataset.cli:era5"
 preprocess_osisaf = "preprocess_toolbox.dataset.cli:osisaf"
 
 # Generation of metadata types
-preprocess_gen_date = "preprocess_toolbox.metadata.cli:date"
-preprocess_gen_mask = "preprocess_toolbox.metadata.cli:mask"
+preprocess_add_mask = "preprocess_toolbox.meta.cli:mask"
+preprocess_add_channel = "preprocess_toolbox.meta.cli:channel"
 
+preprocess_ml_dataset_create = "preprocess_toolbox.ml.cli:create"
+preprocess_ml_dataset_cache = "preprocess_toolbox.ml.cli:cache"
 
 [project.urls]
 

@@ -6,6 +6,8 @@ import re
 
 import pandas as pd
 
+from download_toolbox.interface import Frequency, get_dataset_config_implementation
+
 
 def date_arg(string: str) -> object:
     """
@@ -68,6 +70,23 @@ def csv_of_csv_arg(string: str) -> list:
     return csv_items
 
 
+def csv_of_date_args(string: str) -> list:
+    """
+
+    :param string:
+    :return:
+    """
+    csv_items = []
+    string = re.sub(r'^\'(.*)\'$', r'\1', string)
+
+    for el in string.split(","):
+        if len(el) == 0:
+            csv_items.append(None)
+        else:
+            csv_items.append([date_arg(date) for date in el.split("|")])
+    return csv_items
+
+
 def int_or_list_arg(string: str) -> object:
     """
 
@@ -108,8 +127,11 @@ class ProcessingArgParser(argparse.ArgumentParser):
         self.add_argument("reference", type=str)
         return self
 
-    def add_destination_arg(self):
-        self.add_argument("destination_id", type=str, nargs="?", default=None)
+    def add_destination_arg(self, optional: bool = True):
+        if optional:
+            self.add_argument("destination_id", type=str, nargs="?", default=None)
+        else:
+            self.add_argument("destination_id", type=str)
         return self
 
     def add_loader_args(self):
@@ -129,36 +151,20 @@ class ProcessingArgParser(argparse.ArgumentParser):
                           help="Allow parallel opens and dask implementation")
         return self
 
-    def add_split_date_args(self):
-        self.add_argument("-ns",
-                          "--train_start",
-                          type=dates_arg,
+    def add_split_args(self):
+        self.add_argument("-sn",
+                          "--split-names",
+                          type=csv_arg,
+                          required=False,
+                          default=None)
+        self.add_argument("-ss",
+                          "--split_starts",
+                          type=csv_of_date_args,
                           required=False,
                           default=[])
-        self.add_argument("-ne",
-                          "--train_end",
-                          type=dates_arg,
-                          required=False,
-                          default=[])
-        self.add_argument("-vs",
-                          "--val_start",
-                          type=dates_arg,
-                          required=False,
-                          default=[])
-        self.add_argument("-ve",
-                          "--val_end",
-                          type=dates_arg,
-                          required=False,
-                          default=[])
-        self.add_argument("-ts",
-                          "--test-start",
-                          type=dates_arg,
-                          required=False,
-                          default=[])
-        self.add_argument("-te",
-                          "--test-end",
-                          dest="test_end",
-                          type=dates_arg,
+        self.add_argument("-se",
+                          "--split_ends",
+                          type=csv_of_date_args,
                           required=False,
                           default=[])
         return self
@@ -221,26 +227,36 @@ class ProcessingArgParser(argparse.ArgumentParser):
         return args
 
 
-def process_date_args(args: object) -> dict:
+def process_split_args(args: object,
+                       frequency: Frequency) -> dict:
     """
 
     :param args:
+    :param frequency:
     :return:
     """
-    dates = dict(train=[], val=[], test=[])
+    splits = {_: list() for _ in args.split_names}
 
-    for dataset in ("train", "val", "test"):
-        dataset_dates = collections.deque()
+    for idx, split in enumerate(splits.keys()):
+        split_dates = collections.deque()
 
-        for i, period_start in \
-                enumerate(getattr(args, "{}_start".format(dataset))):
-            period_end = getattr(args, "{}_end".format(dataset))[i]
-            dataset_dates += [
+        for period_start, period_end in zip(args.split_starts[idx], args.split_ends[idx]):
+            split_dates += [
                 pd.to_datetime(date).date()
-                for date in pd.date_range(period_start, period_end, freq="D")
+                for date in pd.date_range(period_start, period_end, freq=frequency.freq)
             ]
-        logging.info("Got {} dates for {}".format(len(dataset_dates), dataset))
+        logging.info("Got {} dates for {}".format(len(split_dates), split))
 
-        dates[dataset] = sorted(list(dataset_dates))
-    return dates
+        splits[split] = sorted(list(split_dates))
+    return splits
 
+
+# def init_loader():
+#     args = ProcessingArgParser().add_destination_arg(optional=False).parse_args()
+#     # We need to establish the ground truth for frequency, shape etc...
+#
+#     ground_truth = get_dataset_config_implementation(args.source)
+#     proc_config = InitProcessor(
+#         ground_truth,
+#         identifier=args.destination_id)
+#     proc_config.save_config()

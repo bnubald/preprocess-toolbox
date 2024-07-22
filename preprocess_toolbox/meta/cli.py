@@ -1,7 +1,7 @@
 from download_toolbox.base import DatasetConfig
 
-from preprocess_toolbox.metadata.meta import MetaPreProcessor
-from preprocess_toolbox.metadata.mask import Masks
+from preprocess_toolbox.meta.meta import MetaPreProcessor
+from preprocess_toolbox.meta.mask import Masks
 from preprocess_toolbox.cli import ProcessingArgParser
 
 
