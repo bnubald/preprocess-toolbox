@@ -49,13 +49,8 @@ preprocess_missing_time = "preprocess_toolbox.data.cli:missing_time"
 preprocess_regrid = "preprocess_toolbox.data.cli:regrid"
 preprocess_rotate = "preprocess_toolbox.data.cli:rotate"
 
-# TODO: The following will incorporate correction calculation AND icenet_process normalisation / variable preparation w.r.t source data
-preprocess_amsr2 = "preprocess_toolbox.dataset.cli:amsr2"
-preprocess_cmip6 = "preprocess_toolbox.dataset.cli:cmip6"
-preprocess_era5 = "preprocess_toolbox.dataset.cli:era5"
-# TODO: preprocess_hres = "preprocess_toolbox.data.cli:hres"
-# TODO: preprocess_oras5 = "preprocess_toolbox.data.cli:oras5"
-preprocess_osisaf = "preprocess_toolbox.dataset.cli:osisaf"
+preprocess_dataset = "preprocess_toolbox.dataset.cli:process_dataset"
+preprocess_loader_init = "preprocess_toolbox.loader.cli:init_loader"
 
 # Generation of metadata types
 preprocess_add_mask = "preprocess_toolbox.meta.cli:mask"

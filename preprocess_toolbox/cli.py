@@ -152,6 +152,11 @@ class ProcessingArgParser(argparse.ArgumentParser):
         return self
 
     def add_split_args(self):
+        self.add_argument("-ps",
+                          "--processing-splits",
+                          type=csv_arg,
+                          required=False,
+                          default=None)
         self.add_argument("-sn",
                           "--split-names",
                           type=csv_arg,
