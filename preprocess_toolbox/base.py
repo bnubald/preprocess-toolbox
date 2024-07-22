@@ -52,12 +52,13 @@ class Processor(DataCollection):
                  parallel_opens: bool = False,
                  ref_procdir: os.PathLike = None,
                  update_key: str = None,
-                 # TODO: should be able to target alternative loader configurations outputs programmatically
-                 update_loader=None,
                  **kwargs) -> None:
         super().__init__(base_path=base_path,
+                         config_type="processed",
                          identifier=identifier,
                          path_components=[])
+
+        self.config.directory = "."
 
         self._abs_vars = absolute_vars if absolute_vars else []
         self._anom_clim_splits = [] if anom_clim_splits is None else anom_clim_splits
@@ -67,7 +68,7 @@ class Processor(DataCollection):
         self._lead_time = lead_time
         self._linear_trends = linear_trends
 
-        if type(linear_trend_steps) == int:
+        if type(linear_trend_steps) is int:
             logging.debug(
                 "Setting range for linear trend steps based on {}".format(
                     linear_trend_steps))
@@ -194,7 +195,7 @@ class Processor(DataCollection):
         new_da = (da - mean) / std
 
         if not self._refdir:
-            open(mean_path, "w").write(",".join([str(f) for f in [mean, std]]))
+            open(mean_path, "w").write(",".join([str(f) for f in [float(mean), float(std)]]))
         return new_da
 
     def _normalise_array_scaling(self, var_name: str, da: object):
@@ -235,8 +236,7 @@ class Processor(DataCollection):
 
         new_da = (da - minimum) / (maximum - minimum)
         if not self._refdir:
-            open(scale_path,
-                 "w").write(",".join([str(f) for f in [minimum, maximum]]))
+            open(scale_path, "w").write(",".join([str(f) for f in [float(minimum), float(maximum)]]))
         return new_da
 
     def get_data_var_folder(self,
@@ -295,14 +295,6 @@ class Processor(DataCollection):
         return [date
                 for clim_split in self._anom_clim_splits
                 for date in self._splits[clim_split]]
-
-    @property
-    def config(self):
-        if self._config is None:
-            self._config = Configuration(directory=".",
-                                         host="loader",
-                                         identifier=self.identifier)
-        return self._config
 
     @property
     def lead_time(self) -> int:

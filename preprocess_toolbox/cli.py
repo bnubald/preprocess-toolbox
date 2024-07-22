@@ -195,7 +195,7 @@ class ProcessingArgParser(argparse.ArgumentParser):
         self.add_argument("--trend-lead",
                           help="Time steps in the future for linear trends",
                           type=int_or_list_arg,
-                          default=93)
+                          default=7)
         return self
 
     def add_reference_arg(self):

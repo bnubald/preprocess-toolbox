@@ -6,6 +6,7 @@ from pprint import pformat
 import dask
 import dask.array
 import numpy as np
+import orjson
 import pandas as pd
 import xarray as xr
 
@@ -142,8 +143,9 @@ class NormalisingChannelProcessor(Processor):
         with dask.config.set(**{'array.slicing.split_large_chunks': True}):
             source_files = list(sorted(set([file
                                             for split, var_files in self.source_files.items()
-                                            for files in var_files.values()
-                                            for file in files])))
+                                            for vn, files in var_files.items()
+                                            for file in files
+                                            if var_name == vn])))
 
             if len(source_files) > 0:
                 logging.info("Opening files for {}".format(var_name))
@@ -271,7 +273,7 @@ class NormalisingChannelProcessor(Processor):
                 else:
                     self._process_channel(var_name, var_suffix)
 
-        # self.update_loader_config()
+        self.save_config()
 
     def pre_normalisation(self, var_name: str, da: object):
         """
@@ -294,6 +296,22 @@ class NormalisingChannelProcessor(Processor):
         logging.debug(
             "No post normalisation implemented for {}".format(var_name))
         return da
+
+    def get_config(self):
+        """
+
+        :return:
+        """
+
+        return {
+            "implementation": self.__class__.__name__,
+            "anom": self._anom_vars,
+            "abs": self._abs_vars,
+            "splits": self.splits,
+            "linear_trends": self._linear_trends,
+            "linear_trend_steps": self._linear_trend_steps,
+            "processed_files": self._processed_files,
+        }
 
     def save_processed_file(self,
                             var_name: str,
