@@ -99,9 +99,8 @@ def int_or_list_arg(string: str) -> object:
         val = string.split(",")
     return val
 
-
-class ProcessingArgParser(argparse.ArgumentParser):
-    """An ArgumentParser specialised to support forecast plot arguments
+class BaseArgParser(argparse.ArgumentParser):
+    """An ArgumentParser specialised to support common argument handling
 
     The 'allow_*' methods return self to permit method chaining.
 
@@ -116,25 +115,52 @@ class ProcessingArgParser(argparse.ArgumentParser):
 
         self._suppress_logs = suppress_logs
 
-        self.add_argument("source", type=str)
-
         self.add_argument("-v",
                           "--verbose",
                           action="store_true",
                           default=False)
 
-    def add_ref_ds_arg(self):
+    def add_extra_args(self, extra_args):
+        for arg in extra_args:
+            self.add_argument(*arg[0], **arg[1])
+        return self
+
+    def parse_args(self, *args, **kwargs):
+        args = super().parse_args(*args, **kwargs)
+
+        loglevel = logging.DEBUG if args.verbose else logging.INFO
+        logging.basicConfig(level=loglevel)
+        logging.getLogger().setLevel(loglevel)
+
+        if self._suppress_logs is not None and type(self._suppress_logs) is list:
+            for log_module in self._suppress_logs:
+                logging.debug("Setting {} to WARNING only".format(log_module))
+                logging.getLogger(log_module).setLevel(logging.WARNING)
+        logging.getLogger("matplotlib").setLevel(logging.WARNING)
+
+        return args
+
+
+class ProcessingArgParser(BaseArgParser):
+    def __init__(self,
+                 *args,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.add_argument("source", type=str)
+
+    def add_ref_ds(self):
         self.add_argument("reference", type=str)
         return self
 
-    def add_destination_arg(self, optional: bool = True):
+    def add_destination(self, optional: bool = True):
         if optional:
             self.add_argument("destination_id", type=str, nargs="?", default=None)
         else:
             self.add_argument("destination_id", type=str)
         return self
 
-    def add_loader_args(self):
+    def add_loader(self):
         self.add_argument("-u",
                           "--update-key",
                           default=None,
@@ -151,7 +177,14 @@ class ProcessingArgParser(argparse.ArgumentParser):
                           help="Allow parallel opens and dask implementation")
         return self
 
-    def add_split_args(self):
+    def add_implementation(self):
+        self.add_argument("-i",
+                          "--implementation",
+                          type=str,
+                          help="Allow implementation to be specified on command line")
+        return self
+
+    def add_splits(self):
         self.add_argument("-ps",
                           "--processing-splits",
                           type=csv_arg,
@@ -174,7 +207,7 @@ class ProcessingArgParser(argparse.ArgumentParser):
                           default=[])
         return self
 
-    def add_var_args(self):
+    def add_vars(self):
         self.add_argument("--abs",
                           help="Comma separated list of abs vars",
                           type=csv_arg,
@@ -185,14 +218,14 @@ class ProcessingArgParser(argparse.ArgumentParser):
                           default=[])
         return self
 
-    def add_var_name_arg(self):
+    def add_var_name(self):
         self.add_argument("-n", "--var-names",
                           help="Comma separated list of variable names",
                           type=csv_arg,
                           default=None)
         return self
 
-    def add_trend_args(self):
+    def add_trends(self):
         self.add_argument("--trends",
                           help="Comma separated list of abs vars",
                           type=csv_arg,
@@ -203,33 +236,13 @@ class ProcessingArgParser(argparse.ArgumentParser):
                           default=7)
         return self
 
-    def add_reference_arg(self):
+    def add_reference(self):
         self.add_argument("-r",
                           "--ref",
                           help="Reference loader for normalisations etc",
                           default=None,
                           type=str)
         return self
-
-    def add_extra_args(self, extra_args):
-        for arg in extra_args:
-            self.add_argument(*arg[0], **arg[1])
-        return self
-
-    def parse_args(self, *args, **kwargs):
-        args = super().parse_args(*args, **kwargs)
-
-        loglevel = logging.DEBUG if args.verbose else logging.INFO
-        logging.basicConfig(level=loglevel)
-        logging.getLogger().setLevel(loglevel)
-
-        if self._suppress_logs is not None and type(self._suppress_logs) is list:
-            for log_module in self._suppress_logs:
-                logging.debug("Setting {} to WARNING only".format(log_module))
-                logging.getLogger(log_module).setLevel(logging.WARNING)
-        logging.getLogger("matplotlib").setLevel(logging.WARNING)
-
-        return args
 
 
 def process_split_args(args: object,
@@ -254,14 +267,3 @@ def process_split_args(args: object,
 
         splits[split] = sorted(list(split_dates))
     return splits
-
-
-# def init_loader():
-#     args = ProcessingArgParser().add_destination_arg(optional=False).parse_args()
-#     # We need to establish the ground truth for frequency, shape etc...
-#
-#     ground_truth = get_dataset_config_implementation(args.source)
-#     proc_config = InitProcessor(
-#         ground_truth,
-#         identifier=args.destination_id)
-#     proc_config.save_config()

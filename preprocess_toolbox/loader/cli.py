@@ -1,12 +1,13 @@
 import argparse
-import copy
 import logging
 import os
 
 import orjson
 
+from preprocess_toolbox.cli import BaseArgParser
 
-class LoaderArgParser(argparse.ArgumentParser):
+
+class LoaderArgParser(BaseArgParser):
     """An ArgumentParser specialised to support forecast plot arguments
 
     The 'allow_*' methods return self to permit method chaining.
@@ -16,36 +17,31 @@ class LoaderArgParser(argparse.ArgumentParser):
 
     def __init__(self,
                  *args,
-                 suppress_logs=None,
                  **kwargs):
         super().__init__(*args, **kwargs)
 
-        self._suppress_logs = suppress_logs
-
         self.add_argument("name",
                           type=str)
+
+    def add_prefix(self):
+        self.add_argument("-p",
+                          "--prefix",
+                          type=str,
+                          default="loader")
+        return self
+
+    def add_configurations(self):
         self.add_argument("configurations",
                           type=argparse.FileType("r"),
                           nargs="+")
-
-        self.add_argument("-v",
-                          "--verbose",
-                          action="store_true",
-                          default=False)
-
-    def parse_args(self, *args, **kwargs):
-        args = super().parse_args(*args, **kwargs)
-
-        loglevel = logging.DEBUG if args.verbose else logging.INFO
-        logging.basicConfig(level=loglevel)
-        logging.getLogger().setLevel(loglevel)
-        logging.getLogger("matplotlib").setLevel(logging.WARNING)
-
-        return args
+        return self
 
 
 def init_loader():
-    args = LoaderArgParser().parse_args()
+    args = (LoaderArgParser().
+            add_prefix().
+            add_configurations().
+            parse_args())
     cfgs = dict()
     filenames = dict()
 
@@ -63,7 +59,14 @@ def init_loader():
     data = dict(
         filenames=filenames,
         sources=cfgs
+        # TODO: shape details
     )
 
-    with open("loader.{}.json".format(args.name), "w") as fh:
-        fh.write(orjson.dumps(data).decode())
+    destination_filename = "{}.{}.json".format(args.prefix, args.name)
+
+    if not os.path.exists(destination_filename):
+        with open(destination_filename, "w") as fh:
+            fh.write(orjson.dumps(data).decode())
+    else:
+        raise FileExistsError("It's pretty pointless calling init on an existing configuration, "
+                              "perhaps delete the file first and go for it")

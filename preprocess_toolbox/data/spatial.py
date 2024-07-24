@@ -23,11 +23,12 @@ def spatial_interpolation(da: xr.DataArray,
 
     TODO: spatial mask can be a callable specified on the command line?
 
-    :param da:
-    :param ds_config:
-    :param spatial_mask:
-    :param save_comparison_fig:
-    :return:
+    Args:
+        da:
+        ds_config:
+        spatial_mask:
+        save_comparison_fig:
+
     """
 
     for date in da.time.values:

@@ -22,7 +22,7 @@ def init_dataset(args):
 
 
 def missing_time():
-    args = ProcessingArgParser().add_destination_arg().add_var_name_arg().parse_args()
+    args = ProcessingArgParser().add_destination().add_var_name().parse_args()
     ds, ds_config = init_dataset(args)
 
     for var_name in args.var_names:
@@ -33,7 +33,7 @@ def missing_time():
 
 
 def missing_spatial():
-    args = ProcessingArgParser(suppress_logs=["PIL"]).add_destination_arg().add_var_name_arg().parse_args()
+    args = ProcessingArgParser(suppress_logs=["PIL"]).add_destination().add_var_name().parse_args()
     ds, ds_config = init_dataset(args)
 
     for var_name in args.var_names:
@@ -47,7 +47,7 @@ def missing_spatial():
 
 
 def regrid():
-    args = ProcessingArgParser().add_ref_ds_arg().add_destination_arg().parse_args()
+    args = ProcessingArgParser().add_ref_ds().add_destination().parse_args()
     ds, ds_config = init_dataset(args)
 
     regrid_dataset(args.reference, ds_config)
@@ -55,7 +55,7 @@ def regrid():
 
 
 def rotate():
-    args = ProcessingArgParser().add_ref_ds_arg().add_destination_arg().add_var_name_arg().parse_args()
+    args = ProcessingArgParser().add_ref_ds().add_destination().add_var_name().parse_args()
     ds, ds_config = init_dataset(args)
 
     rotate_dataset(args.reference, ds_config)

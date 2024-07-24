@@ -1,20 +1,51 @@
-from download_toolbox.base import DatasetConfig
+import argparse
+import os
 
-from preprocess_toolbox.meta.meta import MetaPreProcessor
-from preprocess_toolbox.meta.mask import Masks
-from preprocess_toolbox.cli import ProcessingArgParser
+from download_toolbox.interface import get_dataset_config_implementation
+
+from preprocess_toolbox.loader.cli import LoaderArgParser
+from preprocess_toolbox.loader.utils import update_config
+from preprocess_toolbox.utils import get_implementation
 
 
-def date():
-    args = ProcessingArgParser().parse_args()
+class MetaArgParser(LoaderArgParser):
+    def __init__(self):
+        super().__init__()
+        self.add_argument("ground-truth-dataset", type=str)
 
-    MetaPreProcessor(args.name,
-                     args.dataset).process()
+    def add_channel(self):
+        self.add_argument("channel-name")
+        self.add_argument("implementation")
+        return self
+
+
+def channel():
+    args = (MetaArgParser().
+            add_channel().
+            add_prefix().
+            parse_args())
+    loader_configuration = "{}.{}.json".format(args.prefix, args.name)
+    proc_impl = get_implementation(args.implementation)
+    ds_config = get_dataset_config_implementation(args.ground_truth_dataset)
+    processor = proc_impl(ds_config,
+                          [args.channel_name,],
+                          args.channel_name)
+    processor.process()
+    cfg = processor.get_config()
+    update_config(loader_configuration, args.channel_name, cfg)
 
 
 def mask():
-    args = ProcessingArgParser().parse_args()
-    ds = DatasetConfig.load_dataset(args.dataset)
-    masks = Masks(args.name)
-
-
+    args = (MetaArgParser().
+            add_channel().
+            add_prefix().
+            parse_args())
+    loader_configuration = "{}.{}.json".format(args.prefix, args.name)
+    proc_impl = get_implementation(args.implementation)
+    ds_config = get_dataset_config_implementation(args.ground_truth_dataset)
+    filenames = proc_impl(ds_config, args.channel_name)
+    update_config(loader_configuration, args.channel_name, dict(
+        masks={
+            args.channel_name: filenames
+        }
+    ))
