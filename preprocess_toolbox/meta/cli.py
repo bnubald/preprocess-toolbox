@@ -11,10 +11,10 @@ from preprocess_toolbox.utils import get_implementation
 class MetaArgParser(LoaderArgParser):
     def __init__(self):
         super().__init__()
-        self.add_argument("ground-truth-dataset", type=str)
+        self.add_argument("ground_truth_dataset")
 
     def add_channel(self):
-        self.add_argument("channel-name")
+        self.add_argument("channel_name")
         self.add_argument("implementation")
         return self
 
@@ -24,6 +24,7 @@ def channel():
             add_channel().
             add_prefix().
             parse_args())
+
     loader_configuration = "{}.{}.json".format(args.prefix, args.name)
     proc_impl = get_implementation(args.implementation)
     ds_config = get_dataset_config_implementation(args.ground_truth_dataset)
