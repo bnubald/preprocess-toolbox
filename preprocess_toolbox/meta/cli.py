@@ -25,7 +25,6 @@ def channel():
             add_prefix().
             parse_args())
 
-    loader_configuration = "{}.{}.json".format(args.prefix, args.name)
     proc_impl = get_implementation(args.implementation)
     ds_config = get_dataset_config_implementation(args.ground_truth_dataset)
     processor = proc_impl(ds_config,
@@ -33,7 +32,7 @@ def channel():
                           args.channel_name)
     processor.process()
     cfg = processor.get_config()
-    update_config(loader_configuration, args.channel_name, cfg)
+    update_config(args.name, "channels", cfg)
 
 
 def mask():

@@ -133,4 +133,6 @@ class Processor(DataCollection):
         """A dict with the processed files organised by variable name."""
         return self._processed_files
 
-
+    @property
+    def update_key(self):
+        return self._update_key
