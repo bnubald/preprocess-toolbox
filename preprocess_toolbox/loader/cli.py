@@ -59,7 +59,6 @@ def init_loader():
     data = dict(
         filenames=filenames,
         sources=cfgs
-        # TODO: shape details
     )
 
     destination_filename = "{}.{}.json".format(args.prefix, args.name)

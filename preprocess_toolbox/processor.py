@@ -480,6 +480,7 @@ class NormalisingChannelProcessor(Processor):
             "dataset_config": self._dataset_config,
             "linear_trends": self._linear_trends,
             "linear_trend_steps": self._linear_trend_steps,
+            "path": self.path,
             "processed_files": self._processed_files,
             "source_files": self._source_files,
             "splits": self.splits,
