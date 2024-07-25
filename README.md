@@ -36,7 +36,9 @@ the `--help` switch for more initial information, or the documentation.
 
 The library provides the ability to preprocess `download-toolbox` datasets and create singular configurations for reading out the data in a multi-channel format for dataset construction:
 
-...TODO...
+1. Preprocess datasets from download-toolbox so that the dataset is continuous and normalised for the downstream application
+1. Generate a loader configuration, applying additional metadata (arbitrary channels and masks) providing initial access to the collected data
+1. Use this data loader to produce usable application datasets for downstream applications (testing with IceNet and another internal application)
 
 This is a base library upon which application specific processing is based, lowering the implementation overhead for creating multi-source datasets for environmental applications that require integration of data from sources that `download-toolbox` provide. 
 
