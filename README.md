@@ -1,10 +1,10 @@
-# BAS Download Toolbox
+# Preprocessing Toolbox
 
-![GitHub issues](https://img.shields.io/github/issues/antarctica/preprocess-toolbox?style=plastic)
-![GitHub closed issues](https://img.shields.io/github/issues-closed/antarctica/preprocess-toolbox?style=plastic)
-![GitHub](https://img.shields.io/github/license/antarctica/preprocess-toolbox)
-![GitHub forks](https://img.shields.io/github/forks/antarctica/preprocess-toolbox?style=social)
-![GitHub forks](https://img.shields.io/github/stars/antarctica/preprocess-toolbox?style=social)
+![GitHub issues](https://img.shields.io/github/issues/environmental-forecasting/preprocess-toolbox?style=plastic)
+![GitHub closed issues](https://img.shields.io/github/issues-closed/environmental-forecasting/preprocess-toolbox?style=plastic)
+![GitHub](https://img.shields.io/github/license/environmental-forecasting/preprocess-toolbox)
+![GitHub forks](https://img.shields.io/github/forks/environmental-forecasting/preprocess-toolbox?style=social)
+![GitHub forks](https://img.shields.io/github/stars/environmental-forecasting/preprocess-toolbox?style=social)
 
 This is the preprocessing library for taking `download-toolbox` datasets and combining / composing multi-source data loaders that can be used to cache or supply downstream applications.
 
@@ -65,8 +65,8 @@ Please refer to [the contribution guidelines for more information.](CONTRIBUTING
 
 ## Credits
 
-<a href="https://github.com/antarctica/preprocess-toolbox/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=antarctica/preprocess-toolbox" />
+<a href="https://github.com/environmental-forecasting/preprocess-toolbox/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=environmental-forecasting/preprocess-toolbox" />
 </a>
 
 ## License
