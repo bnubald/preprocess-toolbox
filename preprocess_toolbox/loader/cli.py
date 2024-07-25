@@ -65,7 +65,7 @@ def init_loader():
 
     if not os.path.exists(destination_filename):
         with open(destination_filename, "w") as fh:
-            fh.write(orjson.dumps(data).decode())
+            fh.write(orjson.dumps(data, option=orjson.OPT_INDENT_2).decode())
     else:
         raise FileExistsError("It's pretty pointless calling init on an existing configuration, "
                               "perhaps delete the file first and go for it")
