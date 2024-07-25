@@ -475,9 +475,11 @@ class NormalisingChannelProcessor(Processor):
 
         return {
             "implementation": "{}:{}".format(self.__module__, self.__class__.__name__),
-            "anom": self._anom_vars,
-            "abs": self.abs_vars,
+            "anomoly_vars": self._anom_vars,
+            "absolute_vars": self.abs_vars,
             "dataset_config": self._dataset_config,
+            "lag_time": self._lag_time,
+            "lead_time": self._lead_time,
             "linear_trends": self._linear_trends,
             "linear_trend_steps": self._linear_trend_steps,
             "path": self.path,
@@ -546,6 +548,11 @@ class NormalisingChannelProcessor(Processor):
         return [date
                 for clim_split in self._anom_clim_splits
                 for date in self._splits[clim_split]]
+
+    @property
+    def lag_time(self) -> int:
+        """The lead time used in the data processing."""
+        return self._lag_time
 
     @property
     def lead_time(self) -> int:

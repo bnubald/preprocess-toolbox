@@ -5,11 +5,11 @@ import os
 
 import dask.array
 import numpy as np
-from dateutil.relativedelta import relativedelta
+import xarray as xr
+
 from pprint import pformat
 
-from download_toolbox.config import Configuration
-from download_toolbox.interface import DataCollection, DatasetConfig, Frequency
+from download_toolbox.interface import DataCollection, DatasetConfig
 
 
 class ProcessingError(RuntimeError):
@@ -115,6 +115,30 @@ class Processor(DataCollection):
         else:
             logging.warning("{} already exists in {} processed list".format(file_path, var_name))
         return file_path
+
+    def get_dataset(self,
+                    var_names: list = None):
+        logging.debug("Finding files for {}".format(", ".join(var_names if var_names is not None else "everything")))
+
+        var_files = [var_filepaths
+                     for vn in var_names
+                     for var_filepaths in self.processed_files[vn]] \
+            if var_names is not None else \
+                    [var_filepaths for var_filepaths in self.processed_files.values()]
+
+        logging.info("Got {} filenames to open dataset with!".format(len(var_files)))
+        logging.debug(pformat(var_files))
+
+        # TODO: where's my parallel mfdataset please!?
+        with dask.config.set(**{'array.slicing.split_large_chunks': True}):
+            ds = xr.open_mfdataset(
+                var_files,
+                combine="nested",
+                concat_dim="time",
+                coords="minimal",
+                compat="override"
+            ).drop_duplicates("time").chunk(dict(time=1, ))
+        return ds
 
     @abstractmethod
     def process(self):

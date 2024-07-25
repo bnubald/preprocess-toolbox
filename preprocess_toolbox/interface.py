@@ -4,6 +4,8 @@ import sys
 
 import orjson
 
+from preprocess_toolbox.utils import get_implementation
+
 
 class ProcessorFactory(object):
     @classmethod
@@ -16,7 +18,7 @@ class ProcessorFactory(object):
         if hasattr(sys.modules[__name__], klass_name):
             return getattr(sys.modules[__name__], klass_name)
 
-        logging.error("No class named {0} found in preprocessor_toolbox.data".format(klass_name))
+        logging.error("No class named {0} found in ".format(klass_name))
         raise ReferenceError
 
     @classmethod
@@ -46,3 +48,16 @@ def get_processor_implementation(config: os.PathLike):
     logging.debug("Converted kwargs from the retrieved configuration: {}".format(create_kwargs))
 
     return ProcessorFactory.get_item(implementation)(**create_kwargs)
+
+
+def get_processor_from_source(source_cfg: dict):
+    if "implementation" not in source_cfg:
+        raise RuntimeError("Must specify the implementation to use!")
+    implementation = source_cfg["implementation"]
+
+    create_kwargs = {k: v for k, v in source_cfg.items() if k not in ["implementation",]}
+    logging.info("Attempting to instantiate {} with loaded configuration".format(implementation))
+    logging.debug("Converted kwargs from the retrieved configuration: {}".format(create_kwargs))
+
+    return get_implementation(implementation)(**create_kwargs)
+
