@@ -69,3 +69,11 @@ def init_loader():
     else:
         raise FileExistsError("It's pretty pointless calling init on an existing configuration, "
                               "perhaps delete the file first and go for it")
+
+
+def tfdataset_cache():
+    pass
+
+
+def tfdataset_create():
+    pass

@@ -44,14 +44,11 @@ def mask():
             add_channel().
             add_prefix().
             parse_args())
-    loader_configuration = "{}.{}.json".format(args.prefix, args.name)
     proc_impl = get_implementation(args.implementation)
     ds_config = get_dataset_config_implementation(args.ground_truth_dataset)
     filenames = proc_impl(ds_config,
                           args.channel_name,
                           get_processed_path_for_dataset(args.name, args.ground_truth_dataset))
-    update_config(loader_configuration, args.channel_name, dict(
-        masks={
-            args.channel_name: filenames
-        }
-    ))
+    update_config(args.name, "masks", {
+        args.channel_name: filenames
+    })

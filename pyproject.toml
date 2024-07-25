@@ -44,10 +44,10 @@ docs = [
 ]
 
 [project.scripts]
-preprocess_missing_spatial = "preprocess_toolbox.data.cli:missing_spatial"
-preprocess_missing_time = "preprocess_toolbox.data.cli:missing_time"
-preprocess_regrid = "preprocess_toolbox.data.cli:regrid"
-preprocess_rotate = "preprocess_toolbox.data.cli:rotate"
+preprocess_missing_spatial = "preprocess_toolbox.dataset.cli:missing_spatial"
+preprocess_missing_time = "preprocess_toolbox.dataset.cli:missing_time"
+preprocess_regrid = "preprocess_toolbox.dataset.cli:regrid"
+preprocess_rotate = "preprocess_toolbox.dataset.cli:rotate"
 
 preprocess_dataset = "preprocess_toolbox.dataset.cli:process_dataset"
 preprocess_loader_init = "preprocess_toolbox.loader.cli:init_loader"
@@ -56,8 +56,8 @@ preprocess_loader_init = "preprocess_toolbox.loader.cli:init_loader"
 preprocess_add_mask = "preprocess_toolbox.meta.cli:mask"
 preprocess_add_channel = "preprocess_toolbox.meta.cli:channel"
 
-preprocess_ml_dataset_create = "preprocess_toolbox.ml.cli:create"
-preprocess_ml_dataset_cache = "preprocess_toolbox.ml.cli:cache"
+preprocess_tfdata_dataset_create = "preprocess_toolbox.loader.cli:tfdataset_create"
+preprocess_tfdata_dataset_cache = "preprocess_toolbox.loader.cli:tfdataset_cache"
 
 [project.urls]
 

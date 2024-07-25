@@ -30,8 +30,6 @@ def get_processed_path_for_dataset(loader_config: os.PathLike,
 def update_config(loader_config: os.PathLike,
                   segment: str,
                   configuration: dict):
-    print(loader_config, segment, configuration)
-
     cfg_data = get_config(loader_config)
 
     if segment not in cfg_data:

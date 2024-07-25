@@ -8,9 +8,9 @@ import iris.exceptions
 import numpy as np
 
 from download_toolbox.interface import DatasetConfig
-from preprocess_toolbox.data.spatial import (gridcell_angles_from_dim_coords,
-                                             invert_gridcell_angles,
-                                             rotate_grid_vectors)
+from preprocess_toolbox.dataset.spatial import (gridcell_angles_from_dim_coords,
+                                                invert_gridcell_angles,
+                                                rotate_grid_vectors)
 
 
 def regrid_dataset(ref_file: os.PathLike,
