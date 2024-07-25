@@ -29,12 +29,15 @@ class Processor(DataCollection):
 
     """
 
+    SUFFIXES = ["abs"]
+
     def __init__(self,
                  dataset_config: DatasetConfig,
                  absolute_vars: list,
                  identifier: str,
                  base_path: os.PathLike = os.path.join(".", "processed"),
                  dtype: np.typecodes = np.float32,
+                 processed_files: dict = None,
                  update_key: str = None,
                  **kwargs) -> None:
         """
@@ -58,7 +61,7 @@ class Processor(DataCollection):
         self._abs_vars = absolute_vars if absolute_vars else []
         self._dtype = dtype
 
-        self._processed_files = dict()
+        self._processed_files = dict() if processed_files is None else processed_files
 
         self._update_key = self.identifier if not update_key else update_key
 
@@ -124,20 +127,23 @@ class Processor(DataCollection):
                      for vn in var_names
                      for var_filepaths in self.processed_files[vn]] \
             if var_names is not None else \
-                    [var_filepaths for var_filepaths in self.processed_files.values()]
+                    [var_filepaths
+                     for vn in self.processed_files.keys()
+                     for var_filepaths in self.processed_files[vn].values()]
 
         logging.info("Got {} filenames to open dataset with!".format(len(var_files)))
         logging.debug(pformat(var_files))
 
         # TODO: where's my parallel mfdataset please!?
-        with dask.config.set(**{'array.slicing.split_large_chunks': True}):
+        with (dask.config.set(**{'array.slicing.split_large_chunks': True})):
             ds = xr.open_mfdataset(
                 var_files,
                 combine="nested",
                 concat_dim="time",
                 coords="minimal",
-                compat="override"
-            ).drop_duplicates("time").chunk(dict(time=1, ))
+                compat="override",
+                chunks=dict(time=1, )
+            )
         return ds
 
     @abstractmethod

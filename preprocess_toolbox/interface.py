@@ -4,6 +4,7 @@ import sys
 
 import orjson
 
+from download_toolbox.interface import get_dataset_config_implementation
 from preprocess_toolbox.utils import get_implementation
 
 
@@ -38,7 +39,6 @@ def get_processor_implementation(config: os.PathLike):
         data = fh.read()
 
     cfg = orjson.loads(data)
-    logging.debug("Loaded configuration {}".format(cfg))
     cfg, implementation = cfg["data"], cfg["implementation"]
 
     remaining = {k.strip("_"): v for k, v in cfg.items()}
@@ -50,14 +50,19 @@ def get_processor_implementation(config: os.PathLike):
     return ProcessorFactory.get_item(implementation)(**create_kwargs)
 
 
-def get_processor_from_source(source_cfg: dict):
+def get_processor_from_source(identifier: str, source_cfg: dict):
+    if "dataset_config" not in source_cfg:
+        raise RuntimeError("Source configuration should link to a dataset!")
     if "implementation" not in source_cfg:
         raise RuntimeError("Must specify the implementation to use!")
-    implementation = source_cfg["implementation"]
 
-    create_kwargs = {k: v for k, v in source_cfg.items() if k not in ["implementation",]}
-    logging.info("Attempting to instantiate {} with loaded configuration".format(implementation))
+    create_kwargs = {k: v for k, v in source_cfg.items() if k not in ["dataset_config", "implementation",]}
+    logging.info("Attempting to instantiate {} with loaded configuration".format(source_cfg["implementation"]))
     logging.debug("Converted kwargs from the retrieved configuration: {}".format(create_kwargs))
 
-    return get_implementation(implementation)(**create_kwargs)
+    return get_implementation(source_cfg["implementation"])(
+        get_dataset_config_implementation(source_cfg["dataset_config"]),
+        identifier=identifier,
+        init_source=False,
+        **create_kwargs)
 

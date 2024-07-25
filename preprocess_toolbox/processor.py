@@ -32,7 +32,8 @@ class NormalisingChannelProcessor(Processor):
                  *args,
                  anom_clim_splits: list = None,
                  clim_frequency: Frequency = Frequency.MONTH,
-                 lag_time: int = 0,
+                 init_source: bool = True,
+                 lag_time: int = 1,
                  lead_time: int = 3,
                  linear_trends: list = None,
                  linear_trend_steps: int = 7,
@@ -95,7 +96,8 @@ class NormalisingChannelProcessor(Processor):
         self._splits = splits
         self._source_files = dict()
 
-        self._init_source_data(dataset_config)
+        if init_source:
+            self._init_source_data(dataset_config)
 
     def _build_linear_trend_da(self,
                                input_da: object,
@@ -185,7 +187,7 @@ class NormalisingChannelProcessor(Processor):
         logging.info("Writing new trend cache for {}".format(var_name))
         trend_cache.close()
         linear_trend_da = linear_trend_da.rename("{}_linear_trend".format(var_name))
-        self.save_processed_file(var_name,
+        self.save_processed_file("{}_linear_trend".format(var_name),
                                  "{}_linear_trend.nc".format(var_name),
                                  linear_trend_da)
 
@@ -453,16 +455,12 @@ class NormalisingChannelProcessor(Processor):
                     logging.info("No normalisation for {}".format(var_name))
                 else:
                     logging.info("Normalising {}".format(var_name))
-
-                    logging.debug(pformat(da.time.values))
-                    logging.debug(pformat(self.norm_split_dates))
-
                     da = self._normalise(var_name, da)
 
                 da = self.post_normalisation(var_name, da)
 
                 self.save_processed_file(
-                    var_name,
+                    "{}_{}".format(var_name, var_suffix),
                     "{}_{}.nc".format(var_name, var_suffix),
                     da.rename("_".join([var_name, var_suffix])))
 
@@ -548,6 +546,10 @@ class NormalisingChannelProcessor(Processor):
         return [date
                 for clim_split in self._anom_clim_splits
                 for date in self._splits[clim_split]]
+
+    @property
+    def dataset_config(self):
+        return self._dataset_config
 
     @property
     def lag_time(self) -> int:
