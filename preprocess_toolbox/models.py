@@ -7,7 +7,7 @@ def linear_trend_forecast(
     da: object,
     mask: object,
     missing_dates: object = (),
-    shape: object = (432, 432)
+    shape: tuple = (432, 432)
 ) -> object:
     """
 
@@ -29,9 +29,10 @@ def linear_trend_forecast(
 
     src = np.c_[x, np.ones_like(x)]
     r = np.linalg.lstsq(src, y, rcond=None)[0]
-    output_map = np.matmul(np.array([len(usable_data.time), 1]),
-                           r).reshape(*shape)
-    output_map[mask] = 0.
+    output_map = np.matmul(np.array([len(usable_data.time), 1]), r).reshape(*shape)
+
+    if mask is not None:
+        output_map[mask] = 0.
     output_map[output_map < 0] = 0.
     output_map[output_map > 1] = 1.
 

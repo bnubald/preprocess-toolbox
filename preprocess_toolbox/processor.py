@@ -72,9 +72,14 @@ class NormalisingChannelProcessor(Processor):
         self._anom_clim_splits = [] if anom_clim_splits is None else anom_clim_splits
         self._anom_vars = anomoly_vars if anomoly_vars else []
         self._dataset_config = dataset_config.config_file
+        # This is important to inherit from the dataset and carry forward, it has a lot of downstream impact
+        # TODO: time and spatial information validation - if the source changes what do we do!?
+        self._frequency = dataset_config.frequency
         self._lag_time = lag_time
         self._lead_time = lead_time
         self._linear_trends = linear_trends
+        # TODO: spatial information has been overlooked so far, but needs to carry forward and validate
+        self._location = dataset_config.location
 
         if type(linear_trend_steps) is int:
             logging.debug(
@@ -117,29 +122,40 @@ class NormalisingChannelProcessor(Processor):
 
         if ref_da is None:
             ref_da = input_da
-        data_dates = sorted(
-            [pd.Timestamp(date) for date in input_da.time.values])
+        data_dates = sorted([pd.Timestamp(date) for date in input_da.time.values])
 
         trend_dates = set()
         trend_steps = max(self._linear_trend_steps)
-        logging.info(
-            "Generating trend data up to {} steps ahead for {} dates".format(
-                trend_steps, len(data_dates)))
+
+        extract_date_map = dict(
+            year=lambda dt: "{}".format(dt.year),
+            month=lambda dt: "{}-{}".format(dt.year, dt.month),
+            day=lambda dt: "{}-{}-{}".format(dt.year, dt.month, dt.day),
+            hour=lambda dt: "{}-{}-{}T{}".format(dt.year, dt.month, dt.day, dt.hour),
+        )
+        if self._frequency.attribute == "hour":
+            raise NotImplementedError("Hour based linear trends are not implemented yet")
+
+        trend_range = pd.date_range(pd.to_datetime(extract_date_map[self._frequency.attribute](data_dates[0])),
+                                    pd.to_datetime(extract_date_map[self._frequency.attribute](data_dates[-1])) +
+                                    relativedelta(**{"{}s".format(self._frequency.attribute): trend_steps + 1}),
+                                    freq=self._frequency.freq)
+
+        logging.info("Generating trend data up to {} steps ahead for {} dates".
+                     format(trend_steps, len(data_dates)))
 
         for dat_date in data_dates:
+            base_idx = list(trend_range).index(dat_date)
             trend_dates = trend_dates.union([
-                dat_date + pd.DateOffset(days=d)
-                for d in self._linear_trend_steps
+                trend_range[base_idx + idx]
+                for idx in self._linear_trend_steps
             ])
 
         trend_dates = list(sorted(trend_dates))
         logging.info("Generating {} trend dates".format(len(trend_dates)))
 
         linear_trend_da = \
-            xr.broadcast(input_da, xr.DataArray(pd.date_range(
-                data_dates[0],
-                data_dates[-1] + pd.DateOffset(days=trend_steps)),
-                    dims="time"))[0]
+            xr.broadcast(input_da, xr.DataArray(trend_range, dims="time"))[0]
         linear_trend_da = linear_trend_da.sel(time=trend_dates)
         linear_trend_da.data = dask.array.zeros(linear_trend_da.shape)
 
@@ -162,8 +178,11 @@ class NormalisingChannelProcessor(Processor):
             target_date = pd.to_datetime(processing_date)
 
             # TODO: We're assuming the linear trend as a day-res year long application
+            # TODO: I've hacked a leap year in for the mo, but this should be using loc, a simplified clause and isel
+            #  such as by starting with date_da = da.loc[target_date:]
             date_da = da[(da.time['time.month'] == target_date.month) &
-                         (da.time['time.day'] == target_date.day) &
+                         ((da.time['time.day'] == target_date.day) |
+                          (da.time["time.day"] == target_date.day - 1)) &
                          (da.time <= target_date) &
                          ~da.time.isin(missing_dates)].\
                 isel(time=slice(0, max_years))
