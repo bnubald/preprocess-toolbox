@@ -40,6 +40,7 @@ def process_dataset():
                           ref_procdir=args.ref)
     proc.process()
 
+
 def init_dataset(args):
     ds_config = get_dataset_config_implementation(args.source)
 

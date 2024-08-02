@@ -5,6 +5,11 @@ import os
 import orjson
 
 from preprocess_toolbox.cli import BaseArgParser
+from preprocess_toolbox.loader.utils import get_processed_path_for_dataset, update_config
+from preprocess_toolbox.utils import get_implementation
+
+
+from download_toolbox.interface import get_dataset_config_implementation
 
 
 class LoaderArgParser(BaseArgParser):
@@ -37,9 +42,47 @@ class LoaderArgParser(BaseArgParser):
         return self
 
 
-def init_loader():
+class MetaArgParser(LoaderArgParser):
+    def __init__(self):
+        super().__init__()
+        self.add_argument("ground_truth_dataset")
+
+    def add_channel(self):
+        self.add_argument("channel_name")
+        self.add_argument("implementation")
+        return self
+
+    def add_property(self):
+        self.add_argument("-p", "--property",
+                          type=str, default=None)
+        return self
+
+
+def create():
     args = (LoaderArgParser().
             add_prefix().
+            parse_args())
+
+    data = dict(
+        identifier=args.name,
+        filenames=[],
+        sources=[],
+        masks=[],
+        channels=[],
+    )
+    destination_filename = "{}.{}.json".format(args.prefix, args.name)
+
+    if not os.path.exists(destination_filename):
+        with open(destination_filename, "w") as fh:
+            fh.write(orjson.dumps(data, option=orjson.OPT_INDENT_2).decode())
+        logging.info("Created a configuration {} to build on".format(destination_filename))
+    else:
+        raise FileExistsError("It's pretty pointless calling init on an existing configuration, "
+                              "perhaps delete the file first and go for it")
+
+
+def add_processed():
+    args = (LoaderArgParser().
             add_configurations().
             parse_args())
     cfgs = dict()
@@ -56,24 +99,35 @@ def init_loader():
         filenames[name] = fh.name
         fh.close()
 
-    data = dict(
-        filenames=filenames,
-        sources=cfgs
-    )
-
-    destination_filename = "{}.{}.json".format(args.prefix, args.name)
-
-    if not os.path.exists(destination_filename):
-        with open(destination_filename, "w") as fh:
-            fh.write(orjson.dumps(data, option=orjson.OPT_INDENT_2).decode())
-    else:
-        raise FileExistsError("It's pretty pointless calling init on an existing configuration, "
-                              "perhaps delete the file first and go for it")
+    update_config(args.name, "filenames", filenames)
+    update_config(args.name, "sources", cfgs)
 
 
-def tfdataset_cache():
-    pass
+def add_channel():
+    args = (MetaArgParser().
+            add_channel().
+            parse_args())
+
+    proc_impl = get_implementation(args.implementation)
+    ds_config = get_dataset_config_implementation(args.ground_truth_dataset)
+    processor = proc_impl(ds_config,
+                          [args.channel_name,],
+                          args.channel_name)
+    processor.process()
+    cfg = processor.get_config()
+    update_config(args.name, "channels", cfg)
 
 
-def tfdataset_create():
-    pass
+def add_mask():
+    args = (MetaArgParser().
+            add_channel().
+            add_property().
+            parse_args())
+    proc_impl = get_implementation(args.implementation)
+    ds_config = get_dataset_config_implementation(args.ground_truth_dataset)
+    processor = proc_impl(ds_config,
+                          args.channel_name)
+    filenames = getattr(processor, args.property)
+    update_config(args.name, "masks", {
+        args.channel_name: filenames
+    })

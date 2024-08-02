@@ -49,15 +49,14 @@ preprocess_missing_time = "preprocess_toolbox.dataset.cli:missing_time"
 preprocess_regrid = "preprocess_toolbox.dataset.cli:regrid"
 preprocess_rotate = "preprocess_toolbox.dataset.cli:rotate"
 
+#
+preprocess_loader_init = "preprocess_toolbox.loader.cli:create"
+preprocess_add_mask = "preprocess_toolbox.loader.cli:add_mask"
+preprocess_add_channel = "preprocess_toolbox.loader.cli:add_channel"
+
+# Processing of datasets
 preprocess_dataset = "preprocess_toolbox.dataset.cli:process_dataset"
-preprocess_loader_init = "preprocess_toolbox.loader.cli:init_loader"
-
-# Generation of metadata types
-preprocess_add_mask = "preprocess_toolbox.meta.cli:mask"
-preprocess_add_channel = "preprocess_toolbox.meta.cli:channel"
-
-preprocess_tfdata_dataset_create = "preprocess_toolbox.loader.cli:tfdataset_create"
-preprocess_tfdata_dataset_cache = "preprocess_toolbox.loader.cli:tfdataset_cache"
+preprocess_add_processed = "preprocess_toolbox.loader.cli:add_processed"
 
 [project.urls]
 

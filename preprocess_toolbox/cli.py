@@ -209,11 +209,11 @@ class ProcessingArgParser(BaseArgParser):
 
     def add_vars(self):
         self.add_argument("--abs",
-                          help="Comma separated list of abs vars",
+                          help="Comma separated list of absolute vars",
                           type=csv_arg,
                           default=[])
         self.add_argument("--anom",
-                          help="Comma separated list of abs vars",
+                          help="Comma separated list of anomoly vars",
                           type=csv_arg,
                           default=[])
         return self
