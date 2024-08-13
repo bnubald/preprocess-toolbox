@@ -5,7 +5,7 @@ import os
 import orjson
 
 from preprocess_toolbox.cli import BaseArgParser
-from preprocess_toolbox.loader.utils import get_processed_path_for_dataset, update_config
+from preprocess_toolbox.loader.utils import update_config
 from preprocess_toolbox.utils import get_implementation
 
 
