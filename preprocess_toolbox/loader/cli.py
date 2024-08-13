@@ -126,7 +126,9 @@ def add_mask():
     proc_impl = get_implementation(args.implementation)
     ds_config = get_dataset_config_implementation(args.ground_truth_dataset)
     processor = proc_impl(ds_config,
+                          [args.channel_name,],
                           args.channel_name)
+    processor.process()
     filenames = getattr(processor, args.property)
     update_config(args.name, "masks", {
         args.channel_name: filenames

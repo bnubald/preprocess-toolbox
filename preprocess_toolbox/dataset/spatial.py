@@ -23,6 +23,8 @@ def spatial_interpolation(da: xr.DataArray,
 
     TODO: spatial mask can be a callable specified on the command line?
 
+    TODO: polarhole mask should be applied for interpolation / or added to AGCM
+
     Args:
         da:
         ds_config:
