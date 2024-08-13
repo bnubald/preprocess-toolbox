@@ -65,10 +65,10 @@ def create():
 
     data = dict(
         identifier=args.name,
-        filenames=[],
-        sources=[],
-        masks=[],
-        channels=[],
+        filenames=dict(),
+        sources=dict(),
+        masks=dict(),
+        channels=dict(),
     )
     destination_filename = "{}.{}.json".format(args.prefix, args.name)
 
