@@ -106,6 +106,7 @@ def add_processed():
 def add_channel():
     args = (MetaArgParser().
             add_channel().
+            add_property().
             parse_args())
 
     proc_impl = get_implementation(args.implementation)
@@ -114,7 +115,10 @@ def add_channel():
                           [args.channel_name,],
                           args.channel_name)
     processor.process()
-    cfg = processor.get_config()
+    if args.property is None:
+        cfg = processor.get_config()
+    else:
+        cfg = getattr(processor, args.property)
     update_config(args.name, "channels", cfg)
 
 
@@ -129,7 +133,10 @@ def add_mask():
                           [args.channel_name,],
                           args.channel_name)
     processor.process()
-    filenames = getattr(processor, args.property)
+    if args.property is None:
+        filenames = processor.get_config()
+    else:
+        filenames = getattr(processor, args.property)
     update_config(args.name, "masks", {
         args.channel_name: filenames
     })
