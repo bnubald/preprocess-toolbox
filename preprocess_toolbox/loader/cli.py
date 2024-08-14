@@ -4,6 +4,7 @@ import os
 
 import orjson
 
+import preprocess_toolbox.utils
 from preprocess_toolbox.cli import BaseArgParser
 from preprocess_toolbox.loader.utils import update_config
 from preprocess_toolbox.utils import get_implementation
@@ -114,8 +115,7 @@ def get_channel_info_from_processor(cfg_segment: str):
                           [args.channel_name,],
                           args.channel_name)
     processor.process()
-    cfg = processor.get_config()
-    update_config(args.name, cfg_segment, cfg)
+    update_config(args.name, cfg_segment, {args.channel_name: processor.get_config()})
 
 
 def add_channel():

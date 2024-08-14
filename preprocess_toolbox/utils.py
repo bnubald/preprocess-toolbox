@@ -1,15 +1,14 @@
 import importlib
 import logging
+import os
+
+import orjson
+
+from download_toolbox.interface import get_implementation
 
 
-def get_implementation(location):
-    module_ref, object_name = location.split(":")
-    implementation = None
-
-    try:
-        module = importlib.import_module(module_ref)
-        implementation = getattr(module, object_name)
-    except ImportError:
-        logging.exception("Unable to import from location: {}".format(location))
-
-    return implementation
+def get_config(loader_config: os.PathLike):
+    with open(loader_config, "r") as fh:
+        logging.info("Configuration {} being loaded".format(fh.name))
+        cfg_data = orjson.loads(fh.read())
+    return cfg_data

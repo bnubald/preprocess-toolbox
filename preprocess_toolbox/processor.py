@@ -486,8 +486,9 @@ class NormalisingChannelProcessor(Processor):
     def get_config(self, **kwargs):
         """
 
-        :param **kwargs:
-        :return:
+        Args:
+            **kwargs:
+
         """
 
         return {

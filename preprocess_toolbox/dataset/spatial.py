@@ -16,25 +16,30 @@ from scipy import interpolate
 
 def spatial_interpolation(da: xr.DataArray,
                           ds_config: DatasetConfig,
-                          spatial_mask: callable = None,
+                          mask_processor: object = None,
+                          masks: list = None,
                           save_comparison_fig: bool = False) -> object:
     """
     TODO: method inherited from icenet2 draft code from Tom, not sure it's generalisable
 
-    TODO: spatial mask can be a callable specified on the command line?
-
-    TODO: polarhole mask should be applied for interpolation / or added to AGCM
-
     Args:
         da:
         ds_config:
-        spatial_mask:
+        mask_processor:
+        masks:
         save_comparison_fig:
 
     """
 
     for date in da.time.values:
-        mask = spatial_mask(date) if spatial_mask is not None else None
+        mask = None
+        if mask_processor is not None:
+            for mask in masks:
+                logging.info("Processing {} from {}".format(mask, mask_processor))
+                if mask is None:
+                    mask = getattr(mask_processor, mask)(date)
+                else:
+                    mask[~getattr(mask_processor, mask)(date)] = False
 
         da_el = da.sel(time=date).copy()
         if len(da_el.shape) > 2:

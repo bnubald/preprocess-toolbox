@@ -10,8 +10,9 @@ from preprocess_toolbox.dataset.process import regrid_dataset, rotate_dataset
 from preprocess_toolbox.dataset.spatial import spatial_interpolation
 from preprocess_toolbox.dataset.time import process_missing_dates
 from preprocess_toolbox.cli import ProcessingArgParser, process_split_args
+from preprocess_toolbox.interface import get_processor_from_source
 from preprocess_toolbox.processor import NormalisingChannelProcessor
-from preprocess_toolbox.utils import get_implementation
+from preprocess_toolbox.utils import get_config, get_implementation
 
 
 def process_dataset():
@@ -54,7 +55,10 @@ def init_dataset(args):
 
 
 def missing_time():
-    args = ProcessingArgParser().add_destination().add_var_name().parse_args()
+    args = (ProcessingArgParser().
+            add_destination().
+            add_var_name().
+            parse_args())
     ds, ds_config = init_dataset(args)
 
     for var_name in args.var_names:
@@ -69,14 +73,27 @@ def missing_time():
 
 
 def missing_spatial():
-    args = ProcessingArgParser(suppress_logs=["PIL"]).add_destination().add_var_name().parse_args()
+    args = (ProcessingArgParser(suppress_logs=["PIL"]).
+            add_destination().
+            add_var_name().
+            add_extra_args([
+                (("-m", "--mask-configuration"), dict()),
+                (("-mp", "--masks"), dict(type=list, default=[])),
+            ]).
+            parse_args())
     ds, ds_config = init_dataset(args)
+    mask_proc = None
+
+    if len(args.masks) > 0:
+        proc_config = get_config(args.mask_configuration)["data"]
+        mask_proc = get_processor_from_source("masks", proc_config)
 
     for var_name in args.var_names:
         logging.info("Processing missing dates for {}".format(var_name))
         ds[var_name] = spatial_interpolation(getattr(ds, var_name),
                                              ds_config,
-                                             None,
+                                             mask_proc,
+                                             args.masks,
                                              save_comparison_fig=True)
 
     ds_config.save_data_for_config(source_ds=ds)

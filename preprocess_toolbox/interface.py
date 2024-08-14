@@ -8,26 +8,16 @@ from download_toolbox.interface import get_dataset_config_implementation
 from preprocess_toolbox.utils import get_implementation
 
 
-class ProcessorFactory(object):
-    @classmethod
-    def get_item(cls, impl):
-        klass_name = ProcessorFactory.get_klass_name(impl)
+def get_processor_implementation(config: os.PathLike) -> object:
+    """
 
-        # This looks weird, but to avoid circular imports it helps to isolate implementations
-        # herein, so that dependent libraries can more easily import functionality without
-        # accidentally importing everything through download_toolbox.data
-        if hasattr(sys.modules[__name__], klass_name):
-            return getattr(sys.modules[__name__], klass_name)
+    Args:
+        config:
 
-        logging.error("No class named {0} found in ".format(klass_name))
-        raise ReferenceError
+    Returns:
+        object:
 
-    @classmethod
-    def get_klass_name(cls, name):
-        return name.split(":")[-1]
-
-
-def get_processor_implementation(config: os.PathLike):
+    """
     if not str(config).endswith(".json"):
         raise RuntimeError("{} does not look like a JSON configuration".format(config))
     if not os.path.exists(config):
@@ -39,7 +29,7 @@ def get_processor_implementation(config: os.PathLike):
         data = fh.read()
 
     cfg = orjson.loads(data)
-    cfg, implementation = cfg["data"], cfg["implementation"]
+    cfg, implementation = cfg["data"], get_implementation(cfg["implementation"])
 
     remaining = {k.strip("_"): v for k, v in cfg.items()}
 
@@ -47,10 +37,20 @@ def get_processor_implementation(config: os.PathLike):
     logging.info("Attempting to instantiate {} with loaded configuration".format(implementation))
     logging.debug("Converted kwargs from the retrieved configuration: {}".format(create_kwargs))
 
-    return ProcessorFactory.get_item(implementation)(**create_kwargs)
+    return implementation(**create_kwargs)
 
 
-def get_processor_from_source(identifier: str, source_cfg: dict):
+def get_processor_from_source(identifier: str, source_cfg: dict) -> object:
+    """
+
+    Args:
+        identifier:
+        source_cfg:
+
+    Returns:
+        object:
+
+    """
     if "dataset_config" not in source_cfg:
         raise RuntimeError("Source configuration should link to a dataset!")
     if "implementation" not in source_cfg:

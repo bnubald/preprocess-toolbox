@@ -99,6 +99,7 @@ def int_or_list_arg(string: str) -> object:
         val = string.split(",")
     return val
 
+
 class BaseArgParser(argparse.ArgumentParser):
     """An ArgumentParser specialised to support common argument handling
 

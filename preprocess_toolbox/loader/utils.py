@@ -3,12 +3,7 @@ import os
 
 import orjson
 
-
-def get_config(loader_config: os.PathLike):
-    with open(loader_config, "r") as fh:
-        logging.info("Configuration {} being loaded".format(fh.name))
-        cfg_data = orjson.loads(fh.read())
-    return cfg_data
+from preprocess_toolbox.utils import get_config
 
 
 def update_config(loader_config: os.PathLike,
