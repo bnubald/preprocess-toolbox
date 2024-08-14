@@ -9,7 +9,7 @@ from download_toolbox.interface import get_dataset_config_implementation
 from preprocess_toolbox.dataset.process import regrid_dataset, rotate_dataset
 from preprocess_toolbox.dataset.spatial import spatial_interpolation
 from preprocess_toolbox.dataset.time import process_missing_dates
-from preprocess_toolbox.cli import ProcessingArgParser, process_split_args
+from preprocess_toolbox.cli import ProcessingArgParser, process_split_args, csv_arg
 from preprocess_toolbox.interface import get_processor_from_source
 from preprocess_toolbox.processor import NormalisingChannelProcessor
 from preprocess_toolbox.utils import get_config, get_implementation
@@ -78,7 +78,7 @@ def missing_spatial():
             add_var_name().
             add_extra_args([
                 (("-m", "--mask-configuration"), dict()),
-                (("-mp", "--masks"), dict(type=list, default=[])),
+                (("-mp", "--masks"), dict(type=csv_arg)),
             ]).
             parse_args())
     ds, ds_config = init_dataset(args)
