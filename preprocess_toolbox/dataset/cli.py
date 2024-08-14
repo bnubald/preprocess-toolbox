@@ -1,5 +1,6 @@
 import argparse
 import logging
+import os
 
 from functools import wraps
 
@@ -58,7 +59,11 @@ def missing_time():
 
     for var_name in args.var_names:
         logging.info("Processing missing dates for {}".format(var_name))
-        ds = process_missing_dates(ds, ds_config, var_name)
+        ds = process_missing_dates(ds,
+                                   ds_config,
+                                   var_name,
+                                   missing_dates_path=os.path.join(ds_config.path,
+                                                                   "{}.missing_days.csv".format(var_name)))
 
     ds_config.save_data_for_config(source_ds=ds)
 
