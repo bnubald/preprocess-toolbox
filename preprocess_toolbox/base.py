@@ -96,18 +96,24 @@ class Processor(DataCollection):
     def save_processed_file(self,
                             var_name: str,
                             name: str,
-                            data: object) -> str:
+                            data: object,
+                            overwrite: bool = False) -> str:
         """Save processed data to netCDF file.
 
+        Args:
+            var_name: The name of the variable.
+            name: The name of the file.
+            data: The data to be saved.
+            overwrite: Whether to overwrite extant files
 
-        :param var_name: The name of the variable.
-        :param name: The name of the file.
-        :param data: The data to be saved.
+        Returns:
+            object: The path of the saved netCDF file.
 
-        :return: The path of the saved netCDF file.
         """
         file_path = os.path.join(self.path, name)
-        data.to_netcdf(file_path)
+        if overwrite or not os.path.exists(file_path):
+            logging.debug("Writing to {}".format(file_path))
+            data.to_netcdf(file_path)
 
         if var_name not in self.processed_files.keys():
             self.processed_files[var_name] = list()
@@ -115,8 +121,8 @@ class Processor(DataCollection):
         if file_path not in self.processed_files[var_name]:
             logging.debug("Adding {} file: {}".format(var_name, file_path))
             self.processed_files[var_name].append(file_path)
-        else:
-            logging.warning("{} already exists in {} processed list".format(file_path, var_name))
+        # else:
+        #     logging.warning("{} already exists in {} processed list".format(file_path, var_name))
         return file_path
 
     def get_dataset(self,

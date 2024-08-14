@@ -40,7 +40,7 @@ def spatial_interpolation(da: xr.DataArray,
                     mask = getattr(mask_processor, mask_type)(date)
                 else:
                     add_mask = getattr(mask_processor, mask_type)(date)
-                    mask[~add_mask] = False
+                    mask[add_mask] = True
 
         da_el = da.sel(time=date).copy()
         if len(da_el.shape) > 2:
