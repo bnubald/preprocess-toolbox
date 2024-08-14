@@ -103,10 +103,9 @@ def add_processed():
     update_config(args.name, "sources", cfgs)
 
 
-def add_channel():
+def get_channel_info_from_processor(cfg_segment: str):
     args = (MetaArgParser().
             add_channel().
-            add_property().
             parse_args())
 
     proc_impl = get_implementation(args.implementation)
@@ -115,28 +114,13 @@ def add_channel():
                           [args.channel_name,],
                           args.channel_name)
     processor.process()
-    if args.property is None:
-        cfg = processor.get_config()
-    else:
-        cfg = getattr(processor, args.property)
-    update_config(args.name, "channels", cfg)
+    cfg = processor.get_config()
+    update_config(args.name, cfg_segment, cfg)
+
+
+def add_channel():
+    get_channel_info_from_processor("channels")
 
 
 def add_mask():
-    args = (MetaArgParser().
-            add_channel().
-            add_property().
-            parse_args())
-    proc_impl = get_implementation(args.implementation)
-    ds_config = get_dataset_config_implementation(args.ground_truth_dataset)
-    processor = proc_impl(ds_config,
-                          [args.channel_name,],
-                          args.channel_name)
-    processor.process()
-    if args.property is None:
-        filenames = processor.get_config()
-    else:
-        filenames = getattr(processor, args.property)
-    update_config(args.name, "masks", {
-        args.channel_name: filenames
-    })
+    get_channel_info_from_processor("masks")
