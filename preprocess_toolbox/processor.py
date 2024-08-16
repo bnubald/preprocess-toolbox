@@ -219,8 +219,11 @@ class NormalisingChannelProcessor(Processor):
         :return:
         """
 
+        drop_dates = dict()
+
         for split in self._splits.keys():
             dates = sorted(self._splits[split])
+            drop_dates[split] = list()
 
             if dates:
                 logging.info("Processing {} dates for {} category".format(len(dates), split))
@@ -228,6 +231,7 @@ class NormalisingChannelProcessor(Processor):
                 logging.info("No {} dates for this processor".format(split))
                 continue
 
+            # TODO: two repeated check blocks for lag and lead, this can be generalised
             # Calculating lag dates that aren't already accounted for
             if self._lag_time > 0:
                 logging.info("Including lag of {} {}s".format(self._lag_time, ds_config.frequency.attribute))
@@ -238,8 +242,18 @@ class NormalisingChannelProcessor(Processor):
                     for time in range(self._lag_time):
                         attrs = {"{}s".format(ds_config.frequency.attribute): time + 1}
                         lag_date = date - relativedelta(**attrs)
+
                         if lag_date not in dates:
-                            additional_lag_dates.append(lag_date)
+                            if all([os.path.exists(ds_config.var_filepath(var_config, lag_date))
+                                    for var_config in ds_config.variables]):
+                                # We only add these dates into the mix if all necessary files exist
+                                additional_lag_dates.append(lag_date)
+                            else:
+                                # Otherwise, warn that the lag data means this is being dropped
+                                logging.warning("{} will be dropped from {} due to missing lag data {}".
+                                                format(date, split, lag_date))
+                                drop_dates[split].append(date)
+
                 dates += list(set(additional_lag_dates))
 
             if self._lead_time > 0:
@@ -251,20 +265,26 @@ class NormalisingChannelProcessor(Processor):
                     for time in range(self._lead_time):
                         attrs = {"{}s".format(ds_config.frequency.attribute): time + 1}
                         lead_date = date + relativedelta(**attrs)
+
                         if lead_date not in dates:
-                            additional_lead_dates.append(lead_date)
+                            if all([os.path.exists(ds_config.var_filepath(var_config, lead_date))
+                                    for var_config in ds_config.variables]):
+                                # We only add these dates into the mix if all necessary files exist
+                                additional_lead_dates.append(lead_date)
+                            else:
+                                # Otherwise, warn that the lag data means this is being dropped
+                                logging.warning("{} will be dropped from {} due to missing lead data {}".
+                                                format(date, split, lead_date))
+                                drop_dates[split].append(date)
                 dates += list(set(additional_lead_dates))
 
-            self._source_files[split] = {var_config.name: sorted(ds_config.var_filepaths(var_config, dates)) 
+        for split in self._splits.keys():
+            dates = sorted([data_date for data_date in self._splits[split] if data_date not in drop_dates[split]])
+            self._source_files[split] = {var_config.name: sorted(ds_config.var_filepaths(var_config, dates))
                                          for var_config in ds_config.variables}
 
-        for split in self._source_files:
             for var_name, var_files in self._source_files[split].items():
-                for var_file in var_files:
-                    if not os.path.exists(var_file):
-                        logging.warning("{} does not exist, no inclusion in relevant samples".format(var_file))
                 logging.info("Got {} files for {}:{}".format(len(var_files), split, var_name))
-
         logging.debug(pformat(self._source_files))
 
     def _normalise_array_mean(self, var_name: str, da: object):
