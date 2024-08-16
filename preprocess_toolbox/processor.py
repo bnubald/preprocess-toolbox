@@ -243,7 +243,7 @@ class NormalisingChannelProcessor(Processor):
                 dates += list(set(additional_lag_dates))
 
             if self._lead_time > 0:
-                logging.info("Including lead of {} days".format(self._lead_time))
+                logging.info("Including lead of {} {}s".format(self._lead_time, ds_config.frequency.attribute))
 
                 additional_lead_dates = []
 
@@ -255,14 +255,14 @@ class NormalisingChannelProcessor(Processor):
                             additional_lead_dates.append(lead_date)
                 dates += list(set(additional_lead_dates))
 
-            self._source_files[split] = {var_config.name: sorted(ds_config.var_filepaths(var_config, dates))
+            self._source_files[split] = {var_config.name: sorted(ds_config.var_filepaths(var_config, dates)) 
                                          for var_config in ds_config.variables}
 
         for split in self._source_files:
             for var_name, var_files in self._source_files[split].items():
                 for var_file in var_files:
                     if not os.path.exists(var_file):
-                        logging.warning("{} does not exist, no inclusion in relevant samples")
+                        logging.warning("{} does not exist, no inclusion in relevant samples".format(var_file))
                 logging.info("Got {} files for {}:{}".format(len(var_files), split, var_name))
 
         logging.debug(pformat(self._source_files))
@@ -387,7 +387,8 @@ class NormalisingChannelProcessor(Processor):
                     concat_dim="time",
                     coords="minimal",
                     compat="override",
-                    drop_variables=("lat", "lon"),
+                    # TODO: review this, but if lat-lon is in the file, it's signalling bigger issues
+                    # drop_variables=("lat", "lon"),
                     parallel=self._parallel)
                 da = getattr(ds, var_name)
 
@@ -441,7 +442,7 @@ class NormalisingChannelProcessor(Processor):
 
                 # FIXME: this is not the way to reconvert underlying data on
                 #  dask arrays (da.astype should be used - test with dask)
-                da.data = np.asarray(da.data, dtype=self._dtype)
+                da.astype(self._dtype)
 
                 da = self.pre_normalisation(var_name, da)
                 # We don't do this (https://github.com/tom-andersson/icenet2/
