@@ -113,6 +113,7 @@ class Processor(DataCollection):
         file_path = os.path.join(self.path, name)
         if overwrite or not os.path.exists(file_path):
             logging.debug("Writing to {}".format(file_path))
+            data = data.astype(self._dtype)
             data.to_netcdf(file_path)
 
         if var_name not in self.processed_files.keys():
@@ -148,8 +149,9 @@ class Processor(DataCollection):
                 concat_dim="time",
                 coords="minimal",
                 compat="override",
-                chunks=dict(time=1, )
+                chunks=dict(time=1, ),
             )
+            ds = ds.astype(self._dtype)
         return ds
 
     @abstractmethod

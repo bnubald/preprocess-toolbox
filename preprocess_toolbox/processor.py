@@ -316,7 +316,7 @@ class NormalisingChannelProcessor(Processor):
             logging.debug(
                 "Loading norm-average mean-std from {}".format(mean_path))
             mean, std = tuple([
-                self._dtype(el)
+                self.dtype(el)
                 for el in open(mean_path, "r").read().split(",")
             ])
         elif len(self.norm_split_dates) > 0:
@@ -356,7 +356,7 @@ class NormalisingChannelProcessor(Processor):
             logging.debug(
                 "Loading norm-scaling min-max from {}".format(scale_path))
             minimum, maximum = tuple([
-                self._dtype(el)
+                self.dtype(el)
                 for el in open(scale_path, "r").read().split(",")
             ])
         elif self.norm_split_dates:
@@ -366,8 +366,8 @@ class NormalisingChannelProcessor(Processor):
             norm_samples = da.sel(time=self.norm_split_dates).data
             norm_samples = norm_samples.ravel()
 
-            minimum = dask.array.nanmin(norm_samples).astype(self._dtype)
-            maximum = dask.array.nanmax(norm_samples).astype(self._dtype)
+            minimum = dask.array.nanmin(norm_samples).astype(self.dtype)
+            maximum = dask.array.nanmax(norm_samples).astype(self.dtype)
         else:
             raise RuntimeError("Either a normalisation file or training data "
                                "must be supplied")
@@ -411,6 +411,7 @@ class NormalisingChannelProcessor(Processor):
                     # drop_variables=("lat", "lon"),
                     parallel=self._parallel)
                 da = getattr(ds, var_name)
+                da = da.astype(self.dtype)
 
                 # FIXME: we should ideally store train dates against the
                 #  normalisation and climatology, to ensure recalculation on
@@ -459,10 +460,6 @@ class NormalisingChannelProcessor(Processor):
                         da = da - climatology.mean()
                     else:
                         da = da.groupby("time.month") - climatology
-
-                # FIXME: this is not the way to reconvert underlying data on
-                #  dask arrays (da.astype should be used - test with dask)
-                da.astype(self._dtype)
 
                 da = self.pre_normalisation(var_name, da)
                 # We don't do this (https://github.com/tom-andersson/icenet2/

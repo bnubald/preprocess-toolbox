@@ -94,7 +94,7 @@ def missing_spatial():
                                              ds_config,
                                              mask_proc,
                                              args.masks,
-                                             save_comparison_fig=True)
+                                             save_comparison_fig=False)
 
     ds_config.save_data_for_config(source_ds=ds)
 

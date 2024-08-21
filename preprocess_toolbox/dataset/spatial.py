@@ -34,8 +34,8 @@ def spatial_interpolation(da: xr.DataArray,
     for date in da.time.values:
         mask = None
         if mask_processor is not None:
+            logging.debug("Getting masks {} from {}".format(", ".join(masks), mask_processor))
             for mask_type in masks:
-                logging.info("Processing {} from {}".format(mask_type, mask_processor))
                 if mask is None:
                     mask = getattr(mask_processor, mask_type)(date)
                 else:
