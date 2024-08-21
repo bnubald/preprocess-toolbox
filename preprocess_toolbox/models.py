@@ -27,8 +27,13 @@ def linear_trend_forecast(
     x = np.arange(len(usable_data.time))
     y = usable_data.data.reshape(len(usable_data.time), -1)
 
+    # TODO: We might (and likely do) have dask arrays, which play badly with raw numpy lstsq
+    #  but this cheekily gets round importing dask, it's a temporary hack though
+    if hasattr(y, "compute"):
+        y = y.compute()
+
     src = np.c_[x, np.ones_like(x)]
-    r = np.linalg.lstsq(src, y, rcond=None)[0]
+    r, _, _, _ = np.linalg.lstsq(src, y, rcond=None)
     output_map = np.matmul(np.array([len(usable_data.time), 1]), r).reshape(*shape)
 
     if mask is not None:
