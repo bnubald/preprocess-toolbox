@@ -244,7 +244,7 @@ class NormalisingChannelProcessor(Processor):
                         lag_date = date - relativedelta(**attrs)
 
                         if lag_date not in dates:
-                            if all([os.path.exists(ds_config.var_filepath(var_config, lag_date))
+                            if all([os.path.exists(ds_config.var_filepath(var_config, [lag_date]))
                                     for var_config in ds_config.variables]):
                                 # We only add these dates into the mix if all necessary files exist
                                 additional_lag_dates.append(lag_date)
@@ -267,7 +267,7 @@ class NormalisingChannelProcessor(Processor):
                         lead_date = date + relativedelta(**attrs)
 
                         if lead_date not in dates:
-                            if all([os.path.exists(ds_config.var_filepath(var_config, lead_date))
+                            if all([os.path.exists(ds_config.var_filepath(var_config, [lead_date]))
                                     for var_config in ds_config.variables]):
                                 # We only add these dates into the mix if all necessary files exist
                                 additional_lead_dates.append(lead_date)
