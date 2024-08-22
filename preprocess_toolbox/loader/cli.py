@@ -95,7 +95,7 @@ def add_processed():
 
         if "data" not in cfg_data:
             raise KeyError("There's no data element in {}, that's not right!".format(fh.name))
-        _, name, _ = fh.name.split(".")
+        name = ".".join(fh.name.split(".")[1:-1])
         cfgs[name] = cfg_data["data"]
         filenames[name] = fh.name
         fh.close()
