@@ -48,7 +48,7 @@ def regrid_dataset(ref_file: os.PathLike,
         try:
             cube = iris.load_cube(regrid_datafile)
 
-            # TODO: there is a lot of assumption here
+            # TODO: there is a lot of assumption here - introduce some defense
             if cube.coord_system() is None:
                 cs = ref_cube.coord_system().ellipsoid
 

@@ -97,6 +97,7 @@ class Processor(DataCollection):
                             var_name: str,
                             name: str,
                             data: object,
+                            convert: bool = True,
                             overwrite: bool = False) -> str:
         """Save processed data to netCDF file.
 
@@ -104,6 +105,7 @@ class Processor(DataCollection):
             var_name: The name of the variable.
             name: The name of the file.
             data: The data to be saved.
+            convert: Whether to convert data to the processors data type
             overwrite: Whether to overwrite extant files
 
         Returns:
@@ -113,7 +115,8 @@ class Processor(DataCollection):
         file_path = os.path.join(self.path, name)
         if overwrite or not os.path.exists(file_path):
             logging.debug("Writing to {}".format(file_path))
-            data = data.astype(self._dtype)
+            if convert:
+                data = data.astype(self._dtype)
             data.to_netcdf(file_path)
 
         if var_name not in self.processed_files.keys():
