@@ -8,10 +8,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import xarray as xr
+import scipy.interpolate as interpolate
 
 from download_toolbox.dataset import DatasetConfig
-
-from scipy import interpolate
 
 
 def spatial_interpolation(da: xr.DataArray,
@@ -51,9 +50,7 @@ def spatial_interpolation(da: xr.DataArray,
 
         # Grid cells outside NaN regions
         valid = ~np.isnan(da_el.data)
-
-        # Interpolate mask provided by callable
-        if type(mask) is np.ndarray:
+        if mask is not None:
             valid = valid & ~mask
 
         # Interpolate if there is more than one missing grid cell
