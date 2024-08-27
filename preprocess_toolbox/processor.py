@@ -88,8 +88,6 @@ class NormalisingChannelProcessor(Processor):
             self._linear_trend_steps = list(range(1, linear_trend_steps + 1))
         else:
             self._linear_trend_steps = [int(el) for el in linear_trend_steps]
-        # Dates = collections.namedtuple("Dates", list(splits.keys()))
-        # self._dates = Dates(**{split: split_dates for split, split_dates in splits.items()})
 
         self._no_normalise = no_normalise if no_normalise is not None else tuple()
         self._normalise = self._normalise_array_mean \
@@ -303,7 +301,7 @@ class NormalisingChannelProcessor(Processor):
         :return:
         """
 
-        if self._refdir:
+        if self._refdir is not None:
             logging.info("Using alternate processing directory {} for "
                          "mean".format(self._refdir))
             proc_dir = os.path.join(self._refdir, "normalisation.mean")
@@ -332,7 +330,7 @@ class NormalisingChannelProcessor(Processor):
 
         new_da = (da - mean) / std
 
-        if not self._refdir:
+        if self._refdir is None:
             open(mean_path, "w").write(",".join([str(f) for f in [float(mean), float(std)]]))
         return new_da
 
@@ -343,7 +341,7 @@ class NormalisingChannelProcessor(Processor):
         :param da:
         :return:
         """
-        if self._refdir:
+        if self._refdir is not None:
             logging.info("Using alternate processing directory {} for "
                          "scaling".format(self._refdir))
             proc_dir = os.path.join(self._refdir, "normalisation.scale")
@@ -373,7 +371,7 @@ class NormalisingChannelProcessor(Processor):
                                "must be supplied")
 
         new_da = (da - minimum) / (maximum - minimum)
-        if not self._refdir:
+        if self._refdir is None:
             open(scale_path, "w").write(",".join([str(f) for f in [float(minimum), float(maximum)]]))
         return new_da
 
@@ -418,11 +416,11 @@ class NormalisingChannelProcessor(Processor):
                 #  reprocess. All this need be is in the path, to be honest
 
                 if var_suffix == "anom":
-                    if len(self._anom_clim_splits) < 1:
+                    if len(self._anom_clim_splits) < 1 and self._refdir is None:
                         raise ProcessingError("You must provide a list of splits via "
                                               "anom_clim_splits if you have anomoly channels")
 
-                    if self._refdir:
+                    if self._refdir is not None:
                         logging.info("Loading climatology from alternate directory: {}".format(self._refdir))
                         clim_path = os.path.join(self._refdir, "params", "climatology.{}".format(var_name))
                     else:
@@ -471,14 +469,13 @@ class NormalisingChannelProcessor(Processor):
                         #  overwriting the abs da with linear trend da
                         ref_da = None
 
-                        if self._refdir:
+                        if self._refdir is not None:
                             logging.info(
                                 "We have a reference {}, so will load "
                                 "and supply abs from that for linear trend of "
                                 "{}".format(self._refdir, var_name))
                             ref_da = xr.open_dataarray(
-                                os.path.join(self._refdir, var_name,
-                                             "{}_{}.nc".format(var_name, var_suffix)))
+                                os.path.join(self._refdir, "{}_{}.nc".format(var_name, var_suffix)))
 
                         self._build_linear_trend_da(da, var_name, ref_da=ref_da)
 
