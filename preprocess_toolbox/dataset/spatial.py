@@ -51,7 +51,7 @@ def spatial_interpolation(da: xr.DataArray,
         # Grid cells outside NaN regions
         valid = ~np.isnan(da_el.data)
         if mask is not None:
-            valid = valid & ~mask
+            valid = valid | mask
 
         # Interpolate if there is more than one missing grid cell
         if np.sum(~valid) >= 1:
@@ -117,7 +117,7 @@ def spatial_interpolation(da: xr.DataArray,
                 else:
                     logging.warning("No valid values to interpolate with on {}".format(date_str))
             except Exception as e:
-                logging.warning("Interpolation failed for {}, assignment will not take place".format(date_str))
+                logging.warning("Interpolation failed for {}, assignment will not take place: {}".format(date_str, e))
             else:
                 da.loc[dict(time=date)] = da_el
 

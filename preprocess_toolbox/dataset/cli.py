@@ -88,7 +88,7 @@ def missing_spatial():
 
     for var_name in args.var_names:
         logging.info("Processing missing dates for {}".format(var_name))
-        ds[var_name] = spatial_interpolation(getattr(ds, var_name),
+        ds[var_name] = spatial_interpolation(getattr(ds, var_name).compute(),
                                              ds_config,
                                              mask_proc,
                                              args.masks,
