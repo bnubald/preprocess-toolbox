@@ -35,6 +35,10 @@ def process_dataset():
                           args.abs,
                           anom_clim_splits=args.processing_splits,
                           identifier=args.destination_id,
+                          # TODO: nomenclature is old here, lag and lead make sense in forecasting, but not in here
+                          #  so this mapping should be revised throughout the library - we don't necessarily forecast!
+                          lag_time=args.split_head,
+                          lead_time=args.split_tail,
                           linear_trends=args.trends,
                           linear_trend_steps=args.trend_lead,
                           normalisation_splits=args.processing_splits,
@@ -47,7 +51,7 @@ def init_dataset(args):
     ds_config = get_dataset_config_implementation(args.source)
 
     if args.destination_id is not None:
-        ds_config.copy_to(args.destination_id)
+        ds_config.copy_to(args.destination_id, base_path=args.destination_path)
 
     var_names = None if "var_names" not in args else args.var_names
     ds = ds_config.get_dataset(var_names)

@@ -47,6 +47,9 @@ class MetaArgParser(LoaderArgParser):
     def __init__(self):
         super().__init__()
         self.add_argument("ground_truth_dataset")
+        self.add_argument("-p", "--destination-path",
+                          help="Folder that any output data collections will be put in",
+                          type=str, default="processed_data")
 
     def add_channel(self):
         self.add_argument("channel_name")

@@ -149,6 +149,9 @@ class ProcessingArgParser(BaseArgParser):
         super().__init__(*args, **kwargs)
 
         self.add_argument("source", type=str)
+        self.add_argument("-p", "--destination-path",
+                          help="Folder that any output data collections will be put in",
+                          type=str, default="processed_data")
 
     def add_ref_ds(self):
         self.add_argument("reference", type=str)
@@ -159,6 +162,7 @@ class ProcessingArgParser(BaseArgParser):
             self.add_argument("destination_id", type=str, nargs="?", default=None)
         else:
             self.add_argument("destination_id", type=str)
+
         return self
 
     def add_loader(self):
@@ -206,6 +210,17 @@ class ProcessingArgParser(BaseArgParser):
                           type=csv_of_date_args,
                           required=False,
                           default=[])
+
+        self.add_argument("-sh",
+                          "--split-head",
+                          help="Split dates head, number of time steps to include before",
+                          type=int,
+                          default=0)
+        self.add_argument("-st",
+                          "--split-tail",
+                          help="Split dates tail, number of time steps to include after",
+                          type=int,
+                          default=0)
         return self
 
     def add_vars(self):
