@@ -217,6 +217,7 @@ class NormalisingChannelProcessor(Processor):
         :return:
         """
 
+        split_dates_required = dict()
         drop_dates = dict()
 
         for split in self._splits.keys():
@@ -224,7 +225,8 @@ class NormalisingChannelProcessor(Processor):
             drop_dates[split] = list()
 
             if dates:
-                logging.info("Processing {} dates for {} category".format(len(dates), split))
+                logging.info("Processing {} dates for {} category: {} - {}".
+                             format(len(dates), split, min(dates), max(dates)))
             else:
                 logging.info("No {} dates for this processor".format(split))
                 continue
@@ -275,10 +277,10 @@ class NormalisingChannelProcessor(Processor):
                                                 format(date, split, lead_date))
                                 drop_dates[split].append(date)
                 dates += list(set(additional_lead_dates))
+            split_dates_required[split] = sorted([_ for _ in dates if _ not in drop_dates])
 
         for split in self._splits.keys():
-            dates = sorted([data_date for data_date in self._splits[split] if data_date not in drop_dates[split]])
-            self._source_files[split] = {var_config.name: sorted(ds_config.var_filepaths(var_config, dates))
+            self._source_files[split] = {var_config.name: ds_config.var_filepaths(var_config, split_dates_required[split])
                                          for var_config in ds_config.variables}
 
             for var_name, var_files in self._source_files[split].items():
@@ -392,8 +394,7 @@ class NormalisingChannelProcessor(Processor):
                                             if var_name == vn])))
 
             if len(source_files) > 0:
-                logging.info("Opening files for {}".format(var_name))
-                logging.debug("Files: {}".format(source_files))
+                logging.info("Opening {} files for {}".format(len(source_files), var_name))
 
                 # In the old IceNet library there was dubiousness about the source of the
                 # data so this was harder. Now we work with whatever we get from download-toolbox
