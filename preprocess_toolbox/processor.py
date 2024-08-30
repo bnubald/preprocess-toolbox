@@ -7,12 +7,12 @@ from pprint import pformat
 import dask
 import dask.array
 import numpy as np
-import orjson
 import pandas as pd
 import xarray as xr
 
 from preprocess_toolbox.base import Processor, ProcessingError
 from preprocess_toolbox.models import linear_trend_forecast
+from preprocess_toolbox.utils import get_extension_dates
 
 from download_toolbox.interface import DatasetConfig, Frequency
 
@@ -231,53 +231,20 @@ class NormalisingChannelProcessor(Processor):
                 logging.info("No {} dates for this processor".format(split))
                 continue
 
-            # TODO: two repeated check blocks for lag and lead, this can be generalised
-            # Calculating lag dates that aren't already accounted for
+            # Calculating lead and lag dates that aren't already accounted for in splits
             if self._lag_time > 0:
                 logging.info("Including lag of {} {}s".format(self._lag_time, ds_config.frequency.attribute))
-
-                additional_lag_dates = []
-
-                for date in dates:
-                    for time in range(self._lag_time):
-                        attrs = {"{}s".format(ds_config.frequency.attribute): time + 1}
-                        lag_date = date - relativedelta(**attrs)
-
-                        if lag_date not in dates:
-                            if all([os.path.exists(ds_config.var_filepath(var_config, [lag_date]))
-                                    for var_config in ds_config.variables]):
-                                # We only add these dates into the mix if all necessary files exist
-                                additional_lag_dates.append(lag_date)
-                            else:
-                                # Otherwise, warn that the lag data means this is being dropped
-                                logging.warning("{} will be dropped from {} due to missing lag data {}".
-                                                format(date, split, lag_date))
-                                drop_dates[split].append(date)
-
-                dates += list(set(additional_lag_dates))
+                additional_lag_dates, dropped_lag_dates = get_extension_dates(ds_config, dates, self._lag_time, reverse=True)
+                dates += additional_lag_dates
+                drop_dates[split] += dropped_lag_dates
 
             if self._lead_time > 0:
                 logging.info("Including lead of {} {}s".format(self._lead_time, ds_config.frequency.attribute))
+                additional_lead_dates, dropped_lead_dates = get_extension_dates(ds_config, dates, self._lead_time)
+                dates += additional_lead_dates
+                drop_dates[split] += dropped_lead_dates
 
-                additional_lead_dates = []
-
-                for date in dates:
-                    for time in range(self._lead_time):
-                        attrs = {"{}s".format(ds_config.frequency.attribute): time + 1}
-                        lead_date = date + relativedelta(**attrs)
-
-                        if lead_date not in dates:
-                            if all([os.path.exists(ds_config.var_filepath(var_config, [lead_date]))
-                                    for var_config in ds_config.variables]):
-                                # We only add these dates into the mix if all necessary files exist
-                                additional_lead_dates.append(lead_date)
-                            else:
-                                # Otherwise, warn that the lag data means this is being dropped
-                                logging.warning("{} will be dropped from {} due to missing lead data {}".
-                                                format(date, split, lead_date))
-                                drop_dates[split].append(date)
-                dates += list(set(additional_lead_dates))
-            split_dates_required[split] = sorted([_ for _ in dates if _ not in drop_dates])
+            split_dates_required[split] = sorted([_ for _ in dates if _ not in drop_dates[split]])
 
         for split in self._splits.keys():
             self._source_files[split] = {var_config.name: ds_config.var_filepaths(var_config, split_dates_required[split])

@@ -1,8 +1,6 @@
-import argparse
 import logging
-import os
 
-from functools import wraps
+from dateutil.relativedelta import relativedelta
 
 from download_toolbox.interface import get_dataset_config_implementation
 
@@ -27,7 +25,9 @@ def process_dataset():
     ds_config = get_dataset_config_implementation(args.source)
     splits = process_split_args(args, frequency=ds_config.frequency)
 
-    implementation = NormalisingChannelProcessor if args.implementation is None else get_implementation(args.implementation)
+    implementation = NormalisingChannelProcessor \
+        if args.implementation is None \
+        else get_implementation(args.implementation)
 
     proc = implementation(ds_config,
                           args.anom,
@@ -51,6 +51,29 @@ def init_dataset(args):
     ds_config = get_dataset_config_implementation(args.source)
 
     if args.destination_id is not None:
+        splits = process_split_args(args, frequency=ds_config.frequency)
+
+        if len(splits) > 0:
+            logging.info("Processing based on {} provided splits".format(len(splits)))
+            split_dates = [date for split in splits.values() for date in split]
+
+            all_files = dict()
+            for var_config in ds_config.variables:
+                # This is not processing, so we naively extend the range as the split extension args might be set
+                # and if they aren't the preprocessing will dump the dates via Processor
+                lag = relativedelta({"{}s".format(ds_config.frequency.attribute): args.split_head})
+                lead = relativedelta({"{}s".format(ds_config.frequency.attribute): args.split_head})
+                min_filepath = ds_config.var_filepath(var_config, [min(split_dates) - lag])
+                max_filepath = ds_config.var_filepath(var_config, [max(split_dates) + lead])
+
+                var_files = sorted(ds_config.var_files[var_config.name])
+                min_index = var_files.index(min_filepath)
+                max_index = var_files.index(max_filepath)
+                all_files[var_config.name] = var_files[min_index:max_index+1]
+            ds_config.var_files = all_files
+        else:
+            logging.info("No splits provided, assuming to copy the whole dataset")
+
         ds_config.copy_to(args.destination_id, base_path=args.destination_path)
 
     var_names = None if "var_names" not in args else args.var_names
@@ -105,9 +128,9 @@ def regrid():
     args = (ProcessingArgParser().
             add_ref_ds().
             add_destination().
+            add_splits().
             parse_args())
     ds, ds_config = init_dataset(args)
-
     regrid_dataset(args.reference, ds_config)
     ds_config.save_config()
 
@@ -116,10 +139,10 @@ def rotate():
     args = (ProcessingArgParser().
             add_ref_ds().
             add_destination().
+            add_splits().
             add_var_name().
             parse_args())
     ds, ds_config = init_dataset(args)
-
     rotate_dataset(args.reference, ds_config)
     ds_config.save_config()
 
