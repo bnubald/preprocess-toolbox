@@ -102,7 +102,10 @@ def missing_spatial():
 
 
 def regrid():
-    args = ProcessingArgParser().add_ref_ds().add_destination().parse_args()
+    args = (ProcessingArgParser().
+            add_ref_ds().
+            add_destination().
+            parse_args())
     ds, ds_config = init_dataset(args)
 
     regrid_dataset(args.reference, ds_config)
@@ -110,7 +113,11 @@ def regrid():
 
 
 def rotate():
-    args = ProcessingArgParser().add_ref_ds().add_destination().add_var_name().parse_args()
+    args = (ProcessingArgParser().
+            add_ref_ds().
+            add_destination().
+            add_var_name().
+            parse_args())
     ds, ds_config = init_dataset(args)
 
     rotate_dataset(args.reference, ds_config)

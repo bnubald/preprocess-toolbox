@@ -51,6 +51,8 @@ preprocess_rotate = "preprocess_toolbox.dataset.cli:rotate"
 
 #
 preprocess_loader_init = "preprocess_toolbox.loader.cli:create"
+preprocess_loader_copy = "preprocess_toolbox.loader.cli:copy"
+
 preprocess_add_mask = "preprocess_toolbox.loader.cli:add_mask"
 preprocess_add_channel = "preprocess_toolbox.loader.cli:add_channel"
 

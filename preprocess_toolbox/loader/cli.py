@@ -5,7 +5,7 @@ import os
 import orjson
 
 import preprocess_toolbox.utils
-from preprocess_toolbox.cli import BaseArgParser
+from preprocess_toolbox.cli import BaseArgParser, csv_arg
 from preprocess_toolbox.loader.utils import update_config
 from preprocess_toolbox.utils import get_implementation
 
@@ -22,12 +22,23 @@ class LoaderArgParser(BaseArgParser):
     """
 
     def __init__(self,
+                 source=False,
                  *args,
                  **kwargs):
         super().__init__(*args, **kwargs)
 
+        if source:
+            self.add_argument("source",
+                              type=str)
+
         self.add_argument("name",
                           type=str)
+
+    def add_configurations(self):
+        self.add_argument("configurations",
+                          type=argparse.FileType("r"),
+                          nargs="+")
+        return self
 
     def add_prefix(self):
         self.add_argument("-p",
@@ -36,9 +47,8 @@ class LoaderArgParser(BaseArgParser):
                           default="loader")
         return self
 
-    def add_configurations(self):
-        self.add_argument("configurations",
-                          type=argparse.FileType("r"),
+    def add_sections(self):
+        self.add_argument("segments",
                           nargs="+")
         return self
 
@@ -83,6 +93,28 @@ def create():
     else:
         raise FileExistsError("It's pretty pointless calling init on an existing configuration, "
                               "perhaps delete the file first and go for it")
+
+
+def copy():
+    args = (LoaderArgParser(source=True).
+            add_sections().
+            parse_args())
+    if len(args.segments) < 1:
+        raise RuntimeError("No segments supplied ")
+
+    with open(args.source, "r") as fh:
+        source_data = orjson.loads(fh.read())
+
+    with open(args.name, "r") as fh:
+        dest_data = orjson.loads(fh.read())
+
+    for segment in args.segments:
+        logging.info("Copying segment {} from {} to {}".format(segment, args.source, args.name))
+        dest_data[segment] = source_data[segment]
+
+    logging.info("Outputting {}".format(args.name))
+    with open(args.name, "w") as fh:
+        fh.write(orjson.dumps(dest_data, option=orjson.OPT_INDENT_2).decode())
 
 
 def add_processed():
