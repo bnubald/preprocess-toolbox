@@ -74,7 +74,8 @@ def init_dataset(args):
         else:
             logging.info("No splits provided, assuming to copy the whole dataset")
 
-        ds_config.copy_to(args.destination_id, base_path=args.destination_path)
+        ds_config.copy_to(args.destination_id,
+                          base_path=args.destination_path)
 
     var_names = None if "var_names" not in args else args.var_names
     ds = ds_config.get_dataset(var_names)
