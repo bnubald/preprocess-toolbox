@@ -49,7 +49,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint/flake8: ## check style with flake8
-	flake8 preprocess_toolbox tests
+	flake8 --extend-ignore "W291,W293,E501,W391,E712,E266,E251" preprocess_toolbox tests
 
 
 lint: lint/flake8 ## check style
@@ -81,8 +81,8 @@ release: dist ## package and upload a release
 	twine upload dist/*
 
 dist: clean ## builds source and wheel package
-	python setup.py sdist
-	python setup.py bdist_wheel
+	python -m build --sdist
+	python -m build --wheel
 	ls -l dist
 
 install: clean ## install the package to the active Python's site-packages

@@ -6,7 +6,8 @@
 ![GitHub forks](https://img.shields.io/github/forks/environmental-forecasting/preprocess-toolbox?style=social)
 ![GitHub forks](https://img.shields.io/github/stars/environmental-forecasting/preprocess-toolbox?style=social)
 
-This is the preprocessing library for taking `download-toolbox` datasets and combining / composing multi-source data loaders that can be used to cache or supply downstream applications.
+This is the preprocessing library for taking `download-toolbox` datasets and
+combining / composing multi-source data loaders that can be used to cache or supply downstream applications.
 
 This is only just getting started, more info will appear soon.
 
@@ -29,8 +30,8 @@ Please refer to [the contribution guidelines for more information.](CONTRIBUTING
 
 ## Implementation
 
-When installed, the library will provide a series of CLI commands. Please use 
-the `--help` switch for more initial information, or the documentation. 
+When installed, the library will provide a series of CLI commands. Please use
+the `--help` switch for more initial information, or the documentation.
 
 ### Basic principles
 
@@ -40,7 +41,7 @@ The library provides the ability to preprocess `download-toolbox` datasets and c
 1. Generate a loader configuration, applying additional metadata (arbitrary channels and masks) providing initial access to the collected data
 1. Use this data loader to produce usable application datasets for downstream applications (testing with IceNet and another internal application)
 
-This is a base library upon which application specific processing is based, lowering the implementation overhead for creating multi-source datasets for environmental applications that require integration of data from sources that `download-toolbox` provide. 
+This is a base library upon which application specific processing is based, lowering the implementation overhead for creating multi-source datasets for environmental applications that require integration of data from sources that `download-toolbox` provide.
 
 This library doesn't have knowledge of those datasets, it forms the basis for processing things specific to an application by importing application-specific logic dynamically. See [this issue](https://github.com/environmental-forecasting/preprocess-toolbox/issues/1) for a quick idea of how this works with the [IceNet workflow](https://github.com/icenet-ai/icenet).
 
@@ -48,7 +49,7 @@ This library doesn't have knowledge of those datasets, it forms the basis for pr
 
 There are some major limitations to this as a general purpose tool, these will hopefully be dealt with in time! I'm raising issues as I go
 
-**This is currently very heavy development functionality, but the following commands already work**: 
+**This is currently very heavy development functionality, but the following commands already work**:
 
 * preprocess_missing_spatial - poorly at present due to missing mask backref implementation
 * preprocess_missing_time
@@ -61,15 +62,13 @@ There are some major limitations to this as a general purpose tool, these will h
 
 Other stubs probably don't work, unless I forgot to update these docs!
 
-## Contributing 
+## Contributing
 
 Please refer to [the contribution guidelines for more information.](CONTRIBUTING.rst)
 
 ## Credits
 
-<a href="https://github.com/environmental-forecasting/preprocess-toolbox/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=environmental-forecasting/preprocess-toolbox" />
-</a>
+<a href="https://github.com/environmental-forecasting/preprocess-toolbox/graphs/contributors"><img src="https://contrib.rocks/image?repo=environmental-forecasting/preprocess-toolbox" /></a>
 
 ## License
 
