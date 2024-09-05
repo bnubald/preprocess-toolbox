@@ -269,6 +269,10 @@ def process_split_args(args: object,
     :param frequency:
     :return:
     """
+    if not hasattr(args, "split_names"):
+        logging.info("No split names in arguments to process...")
+        return dict()
+
     splits = {_: list() for _ in args.split_names}
 
     for idx, split in enumerate(splits.keys()):

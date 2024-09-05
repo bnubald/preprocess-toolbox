@@ -70,8 +70,10 @@ def spatial_interpolation(da: xr.DataArray,
                 slice_ends = np.ma.clump_masked(nan_mask.ravel(order=order))
 
                 nan_neighbour_idxs = []
-                nan_neighbour_idxs.extend([s.start for s in slice_ends])
-                nan_neighbour_idxs.extend([s.stop - 1 for s in slice_ends])
+                nan_neighbour_idxs.extend([s.start - 1 for s in slice_ends])
+                nan_neighbour_idxs.extend([s.stop for s in slice_ends])
+                nan_neighbour_idxs = [el for el in nan_neighbour_idxs
+                                      if 0 <= el < np.prod((x_len, y_len))]
 
                 nan_neighbour_arr_i = np.array(
                     np.full(shape=(x_len, y_len), fill_value=False),
