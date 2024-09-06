@@ -17,6 +17,8 @@ license = { file = "LICENSE" }
 dependencies = [
     "download-toolbox",
     "orjson",
+	"pip>=23.3",
+	"wheel>=0.38.1",
 ]
 classifiers = [
     "Development Status :: 3 - Alpha",
