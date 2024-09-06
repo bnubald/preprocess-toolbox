@@ -86,6 +86,7 @@ def missing_time():
     args = (ProcessingArgParser().
             add_destination().
             add_var_name().
+            add_splits().
             parse_args())
     ds, ds_config = init_dataset(args)
 
@@ -102,6 +103,7 @@ def missing_spatial():
     args = (ProcessingArgParser(suppress_logs=["PIL"]).
             add_destination().
             add_var_name().
+            add_splits().
             add_extra_args([
                 (("-m", "--mask-configuration"), dict()),
                 (("-mp", "--masks"), dict(type=csv_arg)),
