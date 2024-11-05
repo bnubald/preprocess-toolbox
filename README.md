@@ -26,7 +26,7 @@ Contact `jambyr <at> bas <dot> ac <dot> uk` if you want further information.
 
 Not currently released to pip.
 
-Please refer to [the contribution guidelines for more information.](CONTRIBUTING.rst)
+Please refer to [the contribution guidelines for more information.](CONTRIBUTING.md)
 
 ## Implementation
 
@@ -64,7 +64,7 @@ Other stubs probably don't work, unless I forgot to update these docs!
 
 ## Contributing
 
-Please refer to [the contribution guidelines for more information.](CONTRIBUTING.rst)
+Please refer to [the contribution guidelines for more information.](CONTRIBUTING.md)
 
 ## Credits
 
