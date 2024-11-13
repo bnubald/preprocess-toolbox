@@ -269,7 +269,7 @@ def process_split_args(args: object,
     :param frequency:
     :return:
     """
-    if not hasattr(args, "split_names"):
+    if not hasattr(args, "split_names") or args.split_names is None:
         logging.info("No split names in arguments to process...")
         return dict()
 
