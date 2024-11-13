@@ -16,6 +16,7 @@ maintainers = [
 license = { file = "LICENSE" }
 dependencies = [
     "download-toolbox",
+    "scitools-iris",
     "orjson",
 	"pip>=23.3",
 	"wheel>=0.38.1",
